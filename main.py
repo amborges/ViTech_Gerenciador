@@ -55,20 +55,60 @@
 ## Importações de bibliotecas necessárias ##
 ############################################
 
-import json
+#pacotes básicos do S.O.
 import os
 import subprocess
-import platform
 from subprocess import PIPE
-from time import sleep
+import sys
 
-#para mostrar os gráficos
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.interpolate
+try:
+	#importações de pacotes python
+	##pacote para looping de tempo do script
+	from time import sleep
+	##pacote requerido pelo backup.json
+	import json
+	##pacote para compilação
+	import platform
+	import distro
+	##pacotes gráficos
+	import pandas as pd
+	import seaborn as sns
+	import matplotlib.pyplot as plt
+	import numpy as np
+	##pacote requerido pelo BD-rate
+	import scipy.interpolate
+except:
+	#Atualização de pacotes python
+	print("Atualizando o pip")
+	subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
+	print("pip atualizado")
+	for package in ["pandas", "seaborn", "matplotlib", "numpy", "scipy", "json", "platform", "distro", "time"]:
+		print("Tentando instalar o pacote ", package)
+		try:
+			subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+			print("Pacote ", package, " atualizado com sucesso!")
+			
+			##pacotes para compilação
+			if package == "platform":
+				import platform
+			elif package == "distro":
+				import distro
+		except:
+			print("Não foi possível atualizar o pacote ", package)
 
+	#importações de pacotes python
+	##pacote para looping de tempo do script
+	from time import sleep
+	##pacote requerido pelo backup.json
+	import json
+	##pacotes gráficos
+	import pandas as pd
+	import seaborn as sns
+	import matplotlib.pyplot as plt
+	import numpy as np
+	##pacote requerido pelo BD-rate
+	import scipy.interpolate
+	
 #Esse é o arquivo de configuração
 import CONFIGURATIONS as CFG
 
@@ -571,7 +611,13 @@ if CFG.COMPILE:
 	#captura a versão do sistema operacional e envia.
 	#Isso é importante pois pode haver condições diferentes
 	#de compilação do programa a depender so sistema operacional
-	CFG.DO_COMPILE(float(platform.dist()[1]))
+	try:
+		#Para versões anteriores ao python3 3.8
+		ubuntu_version = platform.dist()[1]
+	except:
+		#Para versões 3.8 ou superior do python3
+		ubuntu_version = distro.linux_distribution()[1]
+	CFG.DO_COMPILE(float(ubuntu_version))
 
 
 ###############################################################
