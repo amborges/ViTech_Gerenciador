@@ -88,7 +88,7 @@ CQ_LIST = [20, 32, 43, 55] #short list
 ##EXTRA_PARAMS = [] # sem parâmetros extras, 1 conjunto de experimento
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0'] # UM parâmetro extra, 2 conjuntos de experimentos
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0', ' --min-partition-size=16 --max-partition-size=64'] # DOIS parâmetros, 3 conjuntos
-EXTRA_PARAMS = []
+EXTRA_PARAMS = [' --enable-rect-partitions=0']
 
 
 
@@ -131,11 +131,13 @@ VIDEO_EXTENSION = '.y4m'
 ## Definição das Pastas ##
 ##########################
 
-
 #caminho da pasta de compilação do libaom
-#o /bin/ no final é criado automaticamente pelo script.
 #é de lá que ele vai compilar e manter os executáveis
-CODEC_PATH = '/home/alex/Documents/MAKEFILE_AS_PYTHON/aom/bin/'
+#Caso houver mais de uma versão de libaom, ir adicionando as pastas
+# >>>
+#>>>  ATENÇÃO: Todas devem estar na mesma pasta atual do projeto!!!!  <<<
+# >>>
+CODEC_PATHS = ['aom', 'aom2']
 
 #caminhos das pastas dos vídeos separados por resolução
 VIDEOS_PATH = {
@@ -157,7 +159,7 @@ VIDEOS_LIST = [
 #	['240p', 'bqfree_240p_120f'],    # [124.4, 22.8]
 	['240p', 'bqhighway_240p_120f'], # [142.1, 14.3] **
 	['240p', 'bqzoom_240p_120f'],    # [100.1, 12.3] **
-	['240p', 'chairlift_240p_120f'], # [85.2, 8.2]   **
+#	['240p', 'chairlift_240p_120f'], # [85.2, 8.2]   **
 #	['240p', 'dirtbike_240p_120f'],  # [72.4, 5.8]   **
 #	['240p', 'mozzoom_240p_120f'],   # [91.6, 33.4]  **
 	
@@ -253,7 +255,7 @@ VIDEOS_LIST = [
 #   cq, valor de quantização (CQ)
 #   folder, nome da pasta em que o experimento será executado
 #   video_path, caminho completo do vídeo que será codificado
-def GENERATE_COMMAND(core, cq, folder, video_path, extra_param = ''):
+def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_param = ''):
 
 	#criando cada parte da linha de comando. Lembrar do espaçamento entre os parâmetros
 	
@@ -279,10 +281,10 @@ def GENERATE_COMMAND(core, cq, folder, video_path, extra_param = ''):
 	cq_param = ' --end-usage=q --cq-level=' + cq
 	
 	#definindo o arquivo de saída do vídeo codificado
-	webm_param = ' -o '+ folder +'/cq_' + cq + '/webm/coded' +  ep_name + '.webm'
+	webm_param = ' -o '+ folder +'/cq_' + cq + '/webm/coded_' + path_id +  ep_name + '.webm'
 	
 	#definindo aonde que ficará salvo as saídas do codificador
-	output_filename = folder + '/cq_' + cq + '/log/out' +  ep_name + '.log'
+	output_filename = folder + '/cq_' + cq + '/log/out_' + path_id +  ep_name + '.log'
 	output_param = ' > ' + output_filename + ' 2>&1'
 	
 	#definindo outras configurações gerais para o libaom
@@ -291,7 +293,7 @@ def GENERATE_COMMAND(core, cq, folder, video_path, extra_param = ''):
 	#Criando a linha de comando completa
 	codec_command  = cd_param
 	codec_command += taskset_param
-	codec_command += CODEC_PATH + CODEC_NAME
+	codec_command += codec_path + CODEC_NAME
 	codec_command += fixed_param
 	codec_command += limit_param
 	codec_command += cq_param
@@ -344,8 +346,7 @@ def get_psnr_bitrate_time(from_file):
 import os
 #Função que permite baixar o libaom
 #pego somente o caminho do aom, sem o bin/
-def DO_DOWNLOAD():
-	codec_path = CODEC_PATH[:-4]
+def DO_DOWNLOAD(codec_path):
 	if(os.path.exists(codec_path)):
 		#se a pasta já existe, apagar tudo
 		os.system('rm -rf ' + codec_path)
@@ -363,22 +364,22 @@ def DO_DOWNLOAD():
 
 #Função que compila o libaom
 #O código já adapta para possíveis versões diferentes de sistema operacional
-def DO_COMPILE(os_version):
+def DO_COMPILE(os_version, codec_path):
 	#se precisar compilar o libaom, então COMPILA
-	if(os.path.exists(CODEC_PATH)):
+	if(os.path.exists(codec_path)):
 		#se a pasta já existe, apagar tudo pra deixar uma compilação limpa
-		os.system('rm -rf ' + CODEC_PATH)
-	os.system('mkdir ' + CODEC_PATH)
+		os.system('rm -rf ' + codec_path)
+	os.system('mkdir ' + codec_path)
 	
 	if os_version == 18.04:
 		#Em algumas máquinas, dá pra rodar a linha de baixo. O libaom fica especializado
-		cmake_command = 'cd ' + CODEC_PATH + ' && cmake ..'
+		cmake_command = 'cd ' + codec_path + ' && cmake ..'
 	elif os_version > 18.04:
 		#Mas na maioria não, daí tem que compilar de forma genérica:
-		cmake_command = 'cd ' + CODEC_PATH + ' && cmake -DAOM_TARGET_CPU=generic ..'
+		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic ..'
 	else:
 		#Em caso de ubuntu mais velho, utilizar a seguinte chamada:
-		cmake_command = 'cd ' + CODEC_PATH + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
-	make_command = 'cd ' + CODEC_PATH + ' && make'
+		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
+	make_command = 'cd ' + codec_path + ' && make'
 	os.system(cmake_command)
 	os.system(make_command)

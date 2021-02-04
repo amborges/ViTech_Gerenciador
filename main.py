@@ -7,6 +7,22 @@
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
+#                                        Versão 1.1.1, 03 de fevereiro de 2021 #
+#                                                                              #
+# Correções:                                                                   #
+# - Alguns printlog estavam com vírgulas ao invés do +;                        #
+# - O arquivo csv só armazenava o último dado, troquei 'w' por 'a';            #
+#                                                                              #
+# Melhorias em relação à versão 1.1:                                           #
+# - Adicionado um controle de pacotes python. Caso algum não for possível de   #
+# ser importado, então vai se tentar atualizar todos;                          #
+# - Python3 3.8 não oferece mais suporte para platform.dist(), portanto, é     #
+# necessário atualizar o pacote para distro.linux_distribution(). Só que esse  #
+# pacote não é muito utilizado em versões antigas. Por isso, criei um try para #
+# decidir qual dos pacotes deve ser utilizado;                                 #
+#                                                                              #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#                                                                              #
 #                                            Versão 1.1, 19 de Janeiro de 2021 #
 #                                                                              #
 # Melhorias em relação à versão 1.0:                                           #
@@ -112,11 +128,23 @@ except:
 #Esse é o arquivo de configuração
 import CONFIGURATIONS as CFG
 
+
+
+#####################
+## Definição Geral ##
+#####################
+
+#Em geral, todos os arquivos vão ser iniciados da pasta atual
+#O código abaixo pega a localidade do arquivo main.py, e remove 
+#o nome do arquivo python, sobrando apenas a pasta onde ele está
+#sendo executado
+HOME_PATH = '/'.join(os.path.realpath(__file__).split('/')[:-1])
+
+
+
 #############
 ## Classes ##
 #############
-
-
 
 
 #classe experimento. Aqui eu armazeno todos os dados essenciais
@@ -124,7 +152,7 @@ import CONFIGURATIONS as CFG
 #existência da classe para gerenciar a sua execução
 class EXPERIMENT:
 	#cada experimento vai receber uma lista
-	def __init__(self, idx = 0, core = 0, cq = 0, resolution = CFG.VIDEOS_LIST[0][0], video = CFG.VIDEOS_LIST[0][1], extra_param = '', is_there_many_set_of_experiments = False):
+	def __init__(self, idx = 0, core = 0, cq = 0, resolution = CFG.VIDEOS_LIST[0][0], video = CFG.VIDEOS_LIST[0][1], codec_folder = '', extra_param = '', is_there_many_set_of_experiments = False):
 		#identificador único do experimento
 		self.index = idx
 		#número do núcleo em que o experimento irá ser executado
@@ -149,12 +177,17 @@ class EXPERIMENT:
 		self.bitrate = None
 		self.time = None
 		
+		#Gero o caminho completo onde está o codificador
+		codec_path = '/'.join([HOME_PATH, codec_folder, 'bin/'])
+		
 		#linha de comando que será aplicado ao experimento
 		#e também é obtido o arquivo de log após o fim do experimento
 		self.command, self.outputlog = CFG.GENERATE_COMMAND(self.core,
 		                                                    self.cq,
 		                                                    self.video_name,
 		                                                    self.video_file,
+		                                                    codec_path,
+		                                                    codec_folder,
 		                                                    self.extra_param)
 		#texto de identificação do processo no terminal
 		cmd = self.command.split(CFG.CODEC_NAME)[1]
@@ -183,7 +216,7 @@ class EXPERIMENT:
 	#Função que grava em um csv os dados que recebe
 	def export(self):
 		filename = self.video_name + '/summary_of_all_data.csv'
-		csv = open(filename, 'w')
+		csv = open(filename, 'a')
 		if os.path.getsize(filename) == 0:
 			csv.write("set, cq, psnr_y, bitrate, time\n")
 		csv.write(self.extra_param + "," + self.cq + "," + str(self.psnr_y) + "," + str(self.bitrate) + "," + str(self.time))
@@ -209,23 +242,25 @@ class LIST_OF_EXPERIMENTS:
 		#identifico se há mais de um conjunto de experimentos
 		more_than_one_set_of_experiments = len(extra_params) > 1
 		
-		#de cada vídeo e cada CQ e cada configuração extra, gero os experimentos	
+		#de cada vídeo e cada CQ e cada configuração extra, gero os experimentos
 		for resolution, video in CFG.VIDEOS_LIST:
 			for cq in CFG.CQ_LIST:
 				for extra_p in extra_params:
-					exp = EXPERIMENT(idx,
-						             CFG.ALLOWED_CORES[iterate_core], 
-							         cq,
-							         resolution,
-							         video,
-							         extra_p,
-							         more_than_one_set_of_experiments)
+					for codec_path in CFG.CODEC_PATHS:
+						exp = EXPERIMENT(idx,
+								         CFG.ALLOWED_CORES[iterate_core], 
+									     cq,
+									     resolution,
+									     video,
+									     codec_path,
+									     extra_p,
+									     more_than_one_set_of_experiments)
 					
-					self.LIST.append(exp)
-					iterate_core += 1
-					idx += 1
-					if iterate_core >= CFG.MAX_CORES:
-						iterate_core = 0
+						self.LIST.append(exp)
+						iterate_core += 1
+						idx += 1
+						if iterate_core >= CFG.MAX_CORES:
+							iterate_core = 0
 		#controlador de experimentos existentes
 		self.MAX_EXPERIMENTS = len(self.LIST)
 		#informa quantos experimentos já foram finalizados
@@ -370,6 +405,7 @@ class LIST_OF_EXPERIMENTS:
 			
 	#exporta a classe inteira para um arquivo de backup
 	def save_backup(self):
+		#abre com 'w' pq quero sobreescrever o dado antigo
 		backup_file = open('backup.json', 'w')
 		jsoned = json.dumps(self, default=lambda o: o.__dict__)
 		backup_file.write(jsoned)
@@ -382,6 +418,7 @@ class LIST_OF_EXPERIMENTS:
 	#caso sucesso, retornar verdadeiro
 	def load_backup(self):
 		if(os.path.exists('backup.json')):
+			#Aqui eu uso 'r' pq só quero que haja leitura
 			backup_file = open('backup.json', 'r')
 			jsoned = json.load(backup_file)
 			self.__dict__.update(jsoned)
@@ -506,8 +543,7 @@ def is_there_any_codec_in_execution():
 def export_to_csv(video_folder, cfg_set, bdrate, time):
 	filename = video_folder + '/summary_of_BD-rate_Time.csv'
 	csv = open(filename, 'w')
-	if os.path.getsize(filename) == 0:
-		csv.write("configuration, bdrate, time cfg / time anchor\n")
+	csv.write("configuration, bdrate, time cfg / time anchor\n")
 	csv.write(cfg_set + "," + str(bdrate) + "," + str(time))
 	csv.close()
 
@@ -598,7 +634,16 @@ def printlog(text = "", end = "\n"):
 #########################################################
 
 if CFG.DOWNLOAD:
-	CFG.DO_DOWNLOAD()
+	#Esse comando só vai baixar uma única versão do codec
+	codec_path = '/'.join([HOME_PATH, CFG.CODEC_PATHS[0], ''])
+	CFG.DO_DOWNLOAD(codec_path)
+	
+	#Caso existir mais de uma pasta de codec, então finalizar
+	#o código e avisar o usuário que ele deve tomar atitudes
+	if(len(CFG.CODEC_PATHS) > 1):
+		print("\n\nATENÇÃO\n\nCaro usuário, esse script só possibilita o download de apenas uma única cópia do codec. No entanto foi identificado a existência de ", len(CFG.CODEC_PATHS), " pastas diferentes. Portanto, pede-se que você realize as modificações necessárias nas outras pastas. Quando tudo estiver pronto, por favor, desabilite a opção 'DOWNLOAD' e reexecute o script.")
+		#Encerrando a execução
+		sys.exit()
 	
 
 #############################################################
@@ -617,7 +662,11 @@ if CFG.COMPILE:
 	except:
 		#Para versões 3.8 ou superior do python3
 		ubuntu_version = distro.linux_distribution()[1]
-	CFG.DO_COMPILE(float(ubuntu_version))
+	
+	#para cada pasta de codec, compilar
+	for codec in CFG.CODEC_PATHS:
+		codec_path = '/'.join([HOME_PATH, codec, 'bin/'])
+		CFG.DO_COMPILE(float(ubuntu_version), codec_path)
 
 
 ###############################################################
@@ -683,6 +732,7 @@ if CFG.TESTE:
 if CFG.EXECUTE:
 	#crio a lista de experimentos em si
 	list_of_experiments = LIST_OF_EXPERIMENTS()
+	list_of_experiments.save_backup()
 	
 	################
 	# Em casos de testes locais, reduzo o número de experimentos
