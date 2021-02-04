@@ -7,7 +7,7 @@
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
-#                                        Versão 1.1.1, 03 de fevereiro de 2021 #
+#                                        Versão 1.1.1, 04 de fevereiro de 2021 #
 #                                                                              #
 # Correções:                                                                   #
 # - Alguns printlog estavam com vírgulas ao invés do +;                        #
@@ -20,6 +20,9 @@
 # necessário atualizar o pacote para distro.linux_distribution(). Só que esse  #
 # pacote não é muito utilizado em versões antigas. Por isso, criei um try para #
 # decidir qual dos pacotes deve ser utilizado;                                 #
+# - Adicionado suporte para mais de uma versão de codificador, desde que       #
+# estejam em pastas separadas. BD-rate e arquivos csv já consideram esse modo  #
+# de simulação diferente.                                                      #
 #                                                                              #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
@@ -169,6 +172,8 @@ class EXPERIMENT:
 		self.finished = False
 		#identificador se há vários conjuntos de experimentos
 		self.many_experiments = is_there_many_set_of_experiments
+		#nome da pasta principal do codificador utilizado
+		self.codec_folder = codec_folder
 		#configuração extra que foi incluida
 		self.extra_param = extra_param
 		
@@ -187,7 +192,7 @@ class EXPERIMENT:
 		                                                    self.video_name,
 		                                                    self.video_file,
 		                                                    codec_path,
-		                                                    codec_folder,
+		                                                    self.codec_folder,
 		                                                    self.extra_param)
 		#texto de identificação do processo no terminal
 		cmd = self.command.split(CFG.CODEC_NAME)[1]
@@ -219,7 +224,13 @@ class EXPERIMENT:
 		csv = open(filename, 'a')
 		if os.path.getsize(filename) == 0:
 			csv.write("set, cq, psnr_y, bitrate, time\n")
-		csv.write(self.extra_param + "," + self.cq + "," + str(self.psnr_y) + "," + str(self.bitrate) + "," + str(self.time))
+		
+		if (self.extra_param == ''):
+			text_to_show = self.codec_folder + " under anchor"
+		else:
+			text_to_show = self.codec_folder + " under " + self.extra_param
+		csv.write(text_to_show + "," + self.cq + "," + str(self.psnr_y) + "," + str(self.bitrate) + "," + str(self.time) + "\n")
+		
 		csv.close()
 
 
@@ -542,9 +553,10 @@ def is_there_any_codec_in_execution():
 #Função que grava em um csv os dados de BD-rate e tempo calculados
 def export_to_csv(video_folder, cfg_set, bdrate, time):
 	filename = video_folder + '/summary_of_BD-rate_Time.csv'
-	csv = open(filename, 'w')
-	csv.write("configuration, bdrate, time cfg / time anchor\n")
-	csv.write(cfg_set + "," + str(bdrate) + "," + str(time))
+	csv = open(filename, 'a')
+	if os.path.getsize(filename) == 0:
+		csv.write("configuration, bdrate, time cfg / time anchor\n")
+	csv.write(cfg_set + "," + str(bdrate) + "," + str(time) + "\n")
 	csv.close()
 
 
@@ -811,9 +823,9 @@ if CFG.EXECUTE:
 	printlog("\n\nFim das Simulações\n")
 	
 	#Agora posso pegar todos os dados e fazer os BD-rates, se houver:
-	# 1) ao menos UM parâmetro extra, pois preciso comparar duas configurações
+	# 1) ao menos UM parâmetro extra OU ao menos duas versões do codificador, pois preciso comparar duas configurações
 	# 2) ao menos QUATRO CQs, pois a curva de BD-rate requer isso!
-	if ( (len(CFG.EXTRA_PARAMS) > 0) and (len(CFG.CQ_LIST) > 3) ) :
+	if ( ((len(CFG.EXTRA_PARAMS) > 0) or (len(CFG.CODEC_PATHS) > 1)) and (len(CFG.CQ_LIST) > 3) ) :
 		if CFG.VERBOSE:
 			print("Ativando sistema de geração automática de BD-rate")
 		printlog("Ativando sistema de geração automática de BD-rate")
@@ -824,16 +836,18 @@ if CFG.EXECUTE:
 		
 		#Ainda é preciso otimizar esses loops. Ainda está muito força-bruta
 		
-		#vou utilizar uma matriz tridimensional para capturar os valores dos experimentos
-		#a ideia geral: matrix[video][extra_param][cq].append([psnr, bitrate, time])
-		M3D = [None] * len(CFG.VIDEOS_LIST)
-		video_keys = []
-		for i in range(len(CFG.VIDEOS_LIST)):
-			#A lista de vídeos é um array duplo, só me interessa um dos valores
-			video_keys.append(CFG.VIDEOS_LIST[i][1])
-			M3D[i] = [None] * len(extra_params)
-			for j in range(len(extra_params)):
-				M3D[i][j] = [None] * len(CFG.CQ_LIST)
+		#vou utilizar uma matriz quadridimensional para capturar os valores dos experimentos
+		#a ideia geral: matrix[codec][video][extra_param][cq].append([psnr, bitrate, time])
+		M3D = [None] * len(CFG.CODEC_PATHS)
+		for v in range(len(CFG.CODEC_PATHS)):
+			M3D[v] = [None] * len(CFG.VIDEOS_LIST)
+			video_keys = []
+			for i in range(len(CFG.VIDEOS_LIST)):
+				#A lista de vídeos é um array duplo, só me interessa um dos valores
+				video_keys.append(CFG.VIDEOS_LIST[i][1])
+				M3D[v][i] = [None] * len(extra_params)
+				for j in range(len(extra_params)):
+					M3D[v][i][j] = [None] * len(CFG.CQ_LIST)
 		
 		if CFG.VERBOSE:
 			print("Capturando valores dos arquivos...", end="\t")
@@ -842,11 +856,12 @@ if CFG.EXECUTE:
 		for idx in range(0, list_of_experiments.MAX_EXPERIMENTS):
 			exp = list_of_experiments.get_experiment_by_idx(idx)
 			
+			idxCodec = CFG.CODEC_PATHS.index(exp.codec_folder)
 			idxVideo = video_keys.index(exp.video_name)
 			idxParam = extra_params.index(exp.extra_param)
 			idxCQ    = CFG.CQ_LIST.index(int(exp.cq))
 			
-			M3D[idxVideo][idxParam][idxCQ] = [exp.psnr_y, exp.bitrate, exp.time]
+			M3D[idxCodec][idxVideo][idxParam][idxCQ] = [exp.psnr_y, exp.bitrate, exp.time]
 					
 		if CFG.VERBOSE:
 			print("Finalizado!")
@@ -869,47 +884,62 @@ if CFG.EXECUTE:
 			#Capturo os valores âncoras
 			for cq in range(len(CFG.CQ_LIST)):
 				#de cada vídeo, pego o primeiro parâmetro e todos os CQs
-				out = M3D[idxVideo][0][cq]
+				out = M3D[0][idxVideo][0][cq]
 				anchor_psnr.append(out[0])
 				anchor_bitrate.append(out[1])
 				anchor_time.append(out[2])
 			
-			#Para cada parâmetro extra, capturo os valores e processo:
-			#a. O percentual de BD-rate
-			#b. o gráfico da curva de BD-rate
-			#c. O percentual de tempo de execução
-			for param in range(1, len(extra_params)):
-				versus_psnr = []
-				versus_bitrate = []
-				versus_time = []
-				for cq in range(len(CFG.CQ_LIST)):
-					#de cada vídeo, pego o primeiro parâmetro e todos os CQs
-					tmp = M3D[idxVideo][param][cq]
-					versus_psnr.append(tmp[0])
-					versus_bitrate.append(tmp[1])
-					versus_time.append(tmp[2])
+			#para cada codificador principal utilizado...
+			for idxCodec in range(len(CFG.CODEC_PATHS)):
 				
-				bdrate = BD_RATE(anchor_bitrate, 
-				                 anchor_psnr, 
-				                 versus_bitrate, 
-				                 versus_psnr, 
-				                 1)
-				timecomparison = sum(versus_time) / sum(anchor_time)
+				#Para cada parâmetro extra, capturo os valores e processo:
+				#a. O percentual de BD-rate
+				#b. o gráfico da curva de BD-rate
+				#c. O percentual de tempo de execução
+				for param in range(len(extra_params)):
 				
-				plot_bdrate_curve(anchor_psnr,
-				                  anchor_bitrate, 
-				                  versus_psnr, 
-				                  versus_bitrate,
-				                  vid,
-				                  extra_params[param],
-				                  bdrate)
+					if (idxCodec == 0 and param == ''):
+						#então é a configuração âncora, que já foi obtida
+						continue
 				
-				export_to_csv(vid,
-				              extra_params[param],
-				              bdrate,
-				              timecomparison)
+					versus_psnr = []
+					versus_bitrate = []
+					versus_time = []
+					for cq in range(len(CFG.CQ_LIST)):
+						#de cada vídeo, pego o primeiro parâmetro e todos os CQs
+						tmp = M3D[idxCodec][idxVideo][param][cq]
+						versus_psnr.append(tmp[0])
+						versus_bitrate.append(tmp[1])
+						versus_time.append(tmp[2])
+					
+					bdrate = BD_RATE(anchor_bitrate, 
+							         anchor_psnr, 
+							         versus_bitrate, 
+							         versus_psnr, 
+							         1)
+							         
+					timecomparison = sum(versus_time) / sum(anchor_time)
+					
+					if(extra_params[param] == ''):
+						text_to_show = CFG.CODEC_PATHS[idxCodec] + ' under anchor'
+					else:
+						text_to_show = CFG.CODEC_PATHS[idxCodec] + ' under ' + extra_params[param]
+						
+					
+					plot_bdrate_curve(anchor_psnr,
+							          anchor_bitrate, 
+							          versus_psnr, 
+							          versus_bitrate,
+							          vid,
+							          text_to_show,
+							          bdrate)
+					
+					export_to_csv(vid,
+							      text_to_show,
+							      bdrate,
+							      timecomparison)
 				
-				
+			
 		if CFG.VERBOSE:
 			print("Finalizado!")
 		printlog("Finalizado!")
