@@ -7,7 +7,7 @@
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
-#                                        Versão 1.1.1, 04 de fevereiro de 2021 #
+#                                          Versão 1.2, 10 de fevereiro de 2021 #
 #                                                                              #
 # Correções:                                                                   #
 # - Alguns printlog estavam com vírgulas ao invés do +;                        #
@@ -23,6 +23,9 @@
 # - Adicionado suporte para mais de uma versão de codificador, desde que       #
 # estejam em pastas separadas. BD-rate e arquivos csv já consideram esse modo  #
 # de simulação diferente.                                                      #
+# - Descobriu-se que a versão mínima do python para executar o script é a 3.5. #
+# Desta forma, foi incluído um condicional para realizar essa verificação e    #
+# permitir ou não a continuação do script.                                     #
 #                                                                              #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
@@ -79,6 +82,11 @@ import os
 import subprocess
 from subprocess import PIPE
 import sys
+
+if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
+    print("É necessário ter Python 3.5 or superior para utilizar este script!")
+    print("Atualmente você está utilizando a versão {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+    sys.exit(1)
 
 try:
 	#importações de pacotes python
@@ -155,7 +163,20 @@ HOME_PATH = '/'.join(os.path.realpath(__file__).split('/')[:-1])
 #existência da classe para gerenciar a sua execução
 class EXPERIMENT:
 	#cada experimento vai receber uma lista
-	def __init__(self, idx = 0, core = 0, cq = 0, resolution = CFG.VIDEOS_LIST[0][0], video = CFG.VIDEOS_LIST[0][1], codec_folder = '', extra_param = '', is_there_many_set_of_experiments = False):
+	def __init__(self, 
+	             idx = 0, 
+	             core = 0, 
+	             cq = 0, 
+	             resolution = CFG.VIDEOS_LIST[0][0],
+	             video = CFG.VIDEOS_LIST[0][1],
+	             width = CFG.VIDEOS_LIST[0][2],
+	             height = CFG.VIDEOS_LIST[0][3],
+	             subsample = CFG.VIDEOS_LIST[0][4],
+	             bitdepth = CFG.VIDEOS_LIST[0][5],
+	             num_frames = CFG.VIDEOS_LIST[0][6],
+	             codec_folder = '', 
+	             extra_param = '', 
+	             is_there_many_set_of_experiments = False):
 		#identificador único do experimento
 		self.index = idx
 		#número do núcleo em que o experimento irá ser executado
@@ -176,6 +197,16 @@ class EXPERIMENT:
 		self.codec_folder = codec_folder
 		#configuração extra que foi incluida
 		self.extra_param = extra_param
+		#altura do vídeo
+		self.height = height
+		#largura do vídeo
+		self.width = width
+		#produndidade de bits do vídeo
+		self.bitdepth = bitdepth
+		#subamostragem do vídeo
+		self.subsample = subsample
+		#numero de quadros exitentes no vídeo
+		self.num_frames = num_frames 
 		
 		#quando finalizar, eu já posso capturar os dados para cálculos de BD-rate
 		self.psnr_y = None
@@ -193,7 +224,12 @@ class EXPERIMENT:
 		                                                    self.video_file,
 		                                                    codec_path,
 		                                                    self.codec_folder,
-		                                                    self.extra_param)
+		                                                    self.extra_param,
+		                                                    self.width,
+		                                                    self.height,
+		                                                    self.subsample,
+		                                                    self.bitdepth,
+		                                                    self.num_frames)
 		#texto de identificação do processo no terminal
 		cmd = self.command.split(CFG.CODEC_NAME)[1]
 		cmd = cmd.split(CFG.VIDEO_EXTENSION)[0]
@@ -254,7 +290,7 @@ class LIST_OF_EXPERIMENTS:
 		more_than_one_set_of_experiments = len(extra_params) > 1
 		
 		#de cada vídeo e cada CQ e cada configuração extra, gero os experimentos
-		for resolution, video in CFG.VIDEOS_LIST:
+		for resolution, video, width, height, subsample, bitdepth, num_frames in CFG.VIDEOS_LIST:
 			for cq in CFG.CQ_LIST:
 				for extra_p in extra_params:
 					for codec_path in CFG.CODEC_PATHS:
@@ -263,6 +299,11 @@ class LIST_OF_EXPERIMENTS:
 									     cq,
 									     resolution,
 									     video,
+									     width,
+									     height,
+									     subsample,
+									     bitdepth,
+									     num_frames,
 									     codec_path,
 									     extra_p,
 									     more_than_one_set_of_experiments)
@@ -307,7 +348,7 @@ class LIST_OF_EXPERIMENTS:
 			for cq in CFG.CQ_LIST:
 				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq))
 				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/log')
-				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/webm')
+				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/video')
 		
 		#executa o comando em modo terminal	
 		subprocess.call(exp.command, shell=True)

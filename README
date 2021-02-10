@@ -1,0 +1,91 @@
+########################
+## COMENTÁRIOS GERAIS ##
+########################
+
+
+
+Para utilizar esse script, em uma pasta qualquer, adicione os arquivos abaixo:
+
+main.py    CONFIGURATIONS.py
+
+Atualmente há duas versões de CONFIGURATIONS, uma para HEVC e outra para AV1. No futuro, haverá outras versões com o básico para ser utilizado por outros formatos de codificação de vídeo. Para utilizar, basta remover o texto extra que vem no nome do arquivo. Qualquer tipo de alteração personalizada poderá ser realizada dentro de CONFIGURATIONS.py. Neste arquivo, há comentários espalhados ao longo do arquivo, o que permite realizar as alterações necessárias para a tua necessidade.
+
+Recomenda-se realizar um teste completo com apenas poucos quadros, a fim de verificar se tudo está rodando conforme o esperado. Para tanto, modifique a variável FTBE para 3.
+
+Toda vez que finalizar alguma execução, haverá um série de pastas nomeados com os vídeos utilizados no experimento. Dentro destas pastas haverá outra série de pastas para cada um dos CQs utilizados. Para cada uma destas pastas, duas outras subpastas poderão ser encontradas: log e video. Na primeira encontram-se os arquivos textuais de saída dos codificadores. Já na segunda subpasta, encontram-se os arquivos de vídeo dos codificadores.
+
+Caso utilizar configurações extras ou versões de codificador extra, o script irá identificar isso e para cada arquivo dentro de log e video, um texto extra será incluído ao nome do arquivo, a fim de possibilitar a identificação.
+
+Para todas as simulações finalizadas, o script irá capturar os dados de bitrate, PSNR-Y e tempo de execução. Esses valores serão armazenados dentro do arquivo summary_of_all_data.csv, separados por vídeo codificado.
+
+Sempre que possível, o script irá gerar automaticamente um gráfico de BD-rate para cada vídeo. Ao mesmo tempo que agrupa esses resultados no arquivo summary_of_BD-rate_Time.csv.
+
+Se por alguma razão o script gerenciador for encerrado antes de finalizar todas as simulações, é possível re-executar ele para que ele retome os experimentos do momento que foi encerrado.
+
+Qualquer ajuda que precisar, entre em contato através do email: amborges@inf.ufpel.edu.br
+
+
+
+#######################
+## BIBLIOTECA BÁSICA ##
+#######################
+
+
+
+É necessário possuir no mínimo a versão 3.5 do python. Mantenha a versão mais atualizada possível do pip, conforme o comando:
+
+	$python3 -m pip install --upgrade pip
+
+Ubuntu 14.04 não é suportado, pois nativamente a versão python é 3.4. Existe uma versão não oficial do python 3.5 para Ubuntu 14.04, contudo não foram realizados testes para saber se funciona.
+
+As bibliotecas requeridas para compilação do software codificador fica a cargo do usuário. Portanto, teste a compilação antes de utilizar o script.
+
+O script python requer algumas bibliotecas, o próprio script tenta atualizar eles caso houver alguma falha de importação. As bibliotecas utilizadas são: 
+	pandas seaborn matplotlib numpy scipy json time
+	
+O script realiza uma verificação da versão atual do sistema operacional. Há casos em que a compilação necessita de modificações. Portanto, é requerido algum dos seguintes pacotes python: platform ou distro. O pacote distro só está disponível em versões Ubuntu 20.04 ou superior. Enquanto que platform só está disponível nas versões inferiores do Ubuntu 20.04. O próprio script tenta identificar qual dos dois ele poderá importar.
+
+	
+
+################
+## UTILIZAÇÃO ##
+################
+
+
+
+É possível utilizar o script em primeiro plano, conforme:
+
+	$python3 main.py
+	
+É possível também adicionar permissão de acesso ao arquivo main.py, para utilizar ele diretamente, conforme:
+
+	$chmod +x main.py
+	$./main.py
+
+Contudo, a ideia de se utilizar um gerenciador de simulações é que ele seja executado continuadamente sem a atenção do usuário. Portanto, espera-se que o script seja utilizado em segundo plano. Para utilizar o script em segundo plano, basta incluir o caractere & ao final do comando:
+
+	$python3 main.py &
+	
+A princípio o script requer pouco consumo de memória e de processamento. Todavia, caso tu precise se certificar que nada mais interfira no tempo de execução do teu experimento, remova um núcleo da variável ALLOWED_CORES e realize a chamada do script da seguinte forma:
+
+	$taskset -c 0 python3 main.py &
+	
+O valor após '-c' poderá ser qualquer um dos números de cores permitidos para uso, desde que não esteja presente na variável ALLOWED_CORES.
+
+Caso tu utilizar de acesso remoto para realização das simulações, tome cuidado! A maioria dos serviços de acesso remoto destroem programas que foram inicializadas pelo usuário, quando este finaliza o acesso. Há diversas formas de evitar com que isso aconteça. A que eu utilizo é realizar a chamada ao script com 'nohop', que bloqueia a chamada executada de sinais de encerramento. Para utilizar, basta digitar:
+
+	$nohop python3 main.py &
+
+
+
+############
+# CUIDADOS #
+############
+
+
+
+Após finalizarem todos os experimentos, é recomendável excluir o arquivo backup.json, de forma a possibilitar que a re-execução do gerenciador possa ocorrer. Caso contrário, o script irá identificar como continuação do experimento, ele irá identificar as simulações que já ocorreram e não vai colocar elas para rodar novamente. Portanto, quando todas as simulações já finalizaram, executar o script não terá efeito algum, exceto no re-cálculo do BD-rate.
+
+Se por alguma razão o script gerenciador for encerrado antes de finalizar todas as simulações, mas ainda restar simulações em andamento. FINALIZE AS EXECUÇõES antes de re-executar o script novamente. Pois com a ausência do script na pilha de processos em execução, o arquivo de backup não será atualizado, portanto, qualquer simulação em andamento não será salvo no backup.json e nem os seus resultados. Executar o script mesmo com as simulações em andamento irá gerar conflito de arquivos por parte do codificador e disputa de acesso ao processador.
+
+Em caso de real necessidade de reaproveitamento da simulação finalizada após encerramento do script gerenciador, é possível modificar o arquivo backup.json diretamente para que o script gerenciador reconheça aquela simulação como finalizada. Para tanto, é preciso modificar os campos 'executed', 'finished', 'psnr_y', 'bitrate' e 'time' daquela simulação desejada.
