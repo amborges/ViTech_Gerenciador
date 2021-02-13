@@ -7,6 +7,30 @@
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
+#                                        Versão 1.2.1, 13 de fevereiro de 2021 #
+#                                                                              #
+# Correções:                                                                   #
+# - Às vezes o arquivo de log da codificação não é gerado corretamente por     #
+# algum erro durante a codificação. No momento em que o script tenta importar  #
+# os dados do log, acaba ocorrendo erro e trava o script. Para evitar isso, foi#
+# adicionado um try, evitando que o script gerenciador finalizasse a sua       #
+#execução antes de rodar todas as simulações. PROBLEMA: o cálculo de BD-rate   #
+# e sua curva não serão geradas, ocasionando em falha do script. Contudo, aqui #
+# já é no final do script e não há mais a urgência de refazer os experimentos. #
+#                                                                              #
+#                                                                              #
+# Problemas Conhecidos:                                                        #
+# - Caso alguma simulação não tenha os dados necessários para gerar o BD-rate, #
+# o script encerra por erro. É necessário adicionar um comando para refazer a  #
+# busca por esses dados e retornar um aviso em falha, sugerindo ao usuário     #
+# para repetir alguma simulação que tenha dado problema.                       #
+#                                                                              #
+#                                                                              #
+# Melhorias em relação à versão 1.2:                                           #
+# - Havia duplicata de linhas para a função print e printlog. Unifiquei;       #
+#                                                                              #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#                                                                              #
 #                                          Versão 1.2, 10 de fevereiro de 2021 #
 #                                                                              #
 # Correções:                                                                   #
@@ -366,7 +390,14 @@ class LIST_OF_EXPERIMENTS:
 			return None
 		exp = self.LIST[idx]
 		exp.finished = True
-		exp.psnr_y, exp.bitrate, exp.time = CFG.get_psnr_bitrate_time(exp.outputlog)
+		
+		#Adicionado um try para verificar se a busca ocorre como esperado.
+		#Em caso negativo, manter os valores nulos para as variáveis
+		#No futuro, corrigir esse procedimento
+		try:
+			exp.psnr_y, exp.bitrate, exp.time = CFG.get_psnr_bitrate_time(exp.outputlog)
+		except:
+			printlog("FALHA ao obter os dados do log para a simulação de indice " + str(idx) + ".")
 		exp.export()
 		self.TOTAL_FINALIZED += 1
 		self.save_backup()
@@ -670,6 +701,10 @@ def plot_bdrate_curve(p_1, b_1, p_2, b_2, video_folder, experiment_text, bdrate)
 
 #Solução que achei para que as saídas do script fiquem salvas em um arquivo de log
 def printlog(text = "", end = "\n"):
+	if CFG.VERBOSE:
+		#Caso VERBOSE, mostrar no terminal do usuário
+		#ou no arquivo nohup.out, caso tiver utilizado o nohup
+		print(text, end=end)
 	f = open("script_log.log", 'a')
 	f.write(text + end)
 	f.close()
@@ -733,16 +768,10 @@ if CFG.TESTE:
 	list_of_experiments = LIST_OF_EXPERIMENTS()
 	
 	#mostro quantas simulações são possíveis de serem realizadas
-	if CFG.VERBOSE:
-		print("Com a configuração estabelecida, há um total de ", 
-	      list_of_experiments.MAX_EXPERIMENTS,
-	      " simulações que podem ser realizadas.")
 	printlog("Com a configuração estabelecida, há um total de " + 
 	      str(list_of_experiments.MAX_EXPERIMENTS) + 
 	      " simulações que podem ser realizadas.")
 	      
-	if CFG.VERBOSE:
-		print("Iniciando a simulação 1")
 	printlog("Iniciando a simulação 1")
 	#Dado o primeiro core, pego o experimento livre alocado para ele
 	idx = list_of_experiments.get_next_free_experiment_on_core(CFG.ALLOWED_CORES[0])
@@ -753,22 +782,14 @@ if CFG.TESTE:
 	#mando executar o experimento
 	list_of_experiments.execute_experiment_by_idx(idx)
 	while (is_there_any_codec_in_execution()):
-		if CFG.VERBOSE:
-			print("\nEsperando Simulações em Andamento\n")
 		printlog("\nEsperando Simulações em Andamento\n")
 		sleep(CFG.WAITING_TIME)
 	#quando ele terminar, finalizo ele
 	list_of_experiments.finishing_experiment(idx)
-	if CFG.VERBOSE:
-		print("Simulação 1 finalizada.")
+	
 	printlog("Simulação 1 finalizada.")
 	#Mostrando na mão os dados do arquivo de saída
 	exp = list_of_experiments.get_experiment_by_idx(idx)
-	if CFG.VERBOSE:
-		print("A simulação apresentou os seguintes dados:")
-		print("PSNR-Y:", str(exp.psnr_y), "dB")
-		print("bitrate:", str(exp.bitrate), "bps")
-		print("tempo de execução:", str(exp.time), "ms")
 	
 	printlog("A simulação apresentou os seguintes dados:")
 	printlog("PSNR-Y:" + str(exp.psnr_y) + "dB")
@@ -823,13 +844,10 @@ if CFG.EXECUTE:
 				if(exists_command_being_executed_on_core(
 				                     list_of_experiments.get_experiment_by_idx(list_index[idxList]).terminal_command,
 				                     CFG.ALLOWED_CORES[idxList])):
-					if CFG.VERBOSE:
-						print("Núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " ocupado, aguarde...")
+					
 					printlog("Núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " ocupado, aguarde...")
 					continue
 				else:
-					if CFG.VERBOSE:
-						print("Núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " liberado, aguarde...")
 					printlog("Núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " liberado, aguarde...")
 					#já terminou, então preciso finalizar o experimento
 					list_of_experiments.finishing_experiment(list_index[idxList])
@@ -837,8 +855,6 @@ if CFG.EXECUTE:
 					list_index[idxList] = list_of_experiments.get_next_free_experiment_on_core(CFG.ALLOWED_CORES[idxList])
 					#Caso o valor for negativo, já acabaram os experimentos para aquele núcleo
 					if(list_index[idxList] < 0):
-						if CFG.VERBOSE:
-							print("Experimentos do núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " já finalizaram")
 						printlog("Experimentos do núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " já finalizaram")
 						continue
 					else:
@@ -846,29 +862,21 @@ if CFG.EXECUTE:
 						list_of_experiments.get_experiment_by_idx(list_index[idxList]).printable()
 						list_of_experiments.execute_experiment_by_idx(list_index[idxList])
 			
-			if CFG.VERBOSE:
-				print("\nEsperando Simulações em Andamento\n")
 			printlog("\nEsperando Simulações em Andamento\n")
 			sleep(CFG.WAITING_TIME)
 	
 	#todas as simulações estão rodando, mas...
 	#é preciso esperar que eles de fato terminem!
 	while (is_there_any_codec_in_execution()):
-		if CFG.VERBOSE:
-			print("\nEsperando Simulações em Andamento\n")
 		printlog("\nEsperando Simulações em Andamento\n")
 		sleep(CFG.WAITING_TIME)
 	
-	if CFG.VERBOSE:
-		print("\n\nFim das Simulações\n")
 	printlog("\n\nFim das Simulações\n")
 	
 	#Agora posso pegar todos os dados e fazer os BD-rates, se houver:
 	# 1) ao menos UM parâmetro extra OU ao menos duas versões do codificador, pois preciso comparar duas configurações
 	# 2) ao menos QUATRO CQs, pois a curva de BD-rate requer isso!
 	if ( ((len(CFG.EXTRA_PARAMS) > 0) or (len(CFG.CODEC_PATHS) > 1)) and (len(CFG.CQ_LIST) > 3) ) :
-		if CFG.VERBOSE:
-			print("Ativando sistema de geração automática de BD-rate")
 		printlog("Ativando sistema de geração automática de BD-rate")
 		
 		#lista de todos os conjuntos de simulação
@@ -890,8 +898,6 @@ if CFG.EXECUTE:
 				for j in range(len(extra_params)):
 					M3D[v][i][j] = [None] * len(CFG.CQ_LIST)
 		
-		if CFG.VERBOSE:
-			print("Capturando valores dos arquivos...", end="\t")
 		printlog("Capturando valores dos arquivos...", end="\t")
 		#para cada simulação...
 		for idx in range(0, list_of_experiments.MAX_EXPERIMENTS):
@@ -904,9 +910,6 @@ if CFG.EXECUTE:
 			
 			M3D[idxCodec][idxVideo][idxParam][idxCQ] = [exp.psnr_y, exp.bitrate, exp.time]
 					
-		if CFG.VERBOSE:
-			print("Finalizado!")
-			print("Gerando percentuais...", end="\t")
 		printlog("Finalizado!")	
 		printlog("Gerando percentuais...", end="\t")
 		
@@ -981,12 +984,8 @@ if CFG.EXECUTE:
 							      timecomparison)
 				
 			
-		if CFG.VERBOSE:
-			print("Finalizado!")
 		printlog("Finalizado!")
 		
-	print("Script Gerenciador finalizado com sucesso!")
 	printlog("Script Gerenciador finalizado com sucesso!")
 	
-print("\n\nscript desevolvido por amborges@inf.ufpel.edu.br\n")
 printlog("\n\nscript desevolvido por amborges@inf.ufpel.edu.br\n")
