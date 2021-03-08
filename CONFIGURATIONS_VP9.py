@@ -307,8 +307,6 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	codec_command += output_param + ' &'
 	#o & comercial no final serve para colocar o processo em segundo plano!
 	
-	print(codec_command)
-	
 	#retornando a linha de comando e o arquivo de saída
 	return codec_command, output_filename
 	
