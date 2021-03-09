@@ -270,8 +270,6 @@ class EXPERIMENT:
 		if self.many_experiments:
 			txt += "\tSET='" + self.extra_param + "'"
 		
-		if CFG.VERBOSE:
-			print(txt)
 		printlog(txt)
 		
 	#nos backup da vida, preciso reinterpretar os dados json
@@ -343,15 +341,11 @@ class LIST_OF_EXPERIMENTS:
 		self.TOTAL_FINALIZED = 0
 		
 		if(self.load_backup()):
-			if CFG.VERBOSE:
-				print("Dados do backup foram recuperados com sucesso!")
 			printlog("Dados do backup foram recuperados com sucesso!")
 	
 	#retorna um experimento de acordo com o seu índice
 	def get_experiment_by_idx(self, idx):
 		if(idx >= self.MAX_EXPERIMENTS):
-			if CFG.VERBOSE:
-				print("FALHA F1: tentativa ilegal de acesso à lista de experimentos")
 			printlog("FALHA F1: tentativa ilegal de acesso à lista de experimentos")
 			return None
 		return self.LIST[idx]
@@ -359,8 +353,6 @@ class LIST_OF_EXPERIMENTS:
 	#manda rodar um experimento com base em seu index
 	def execute_experiment_by_idx(self, idx):
 		if(idx >= self.MAX_EXPERIMENTS):
-			if CFG.VERBOSE:
-				print("FALHA F2: tentativa ilegal de acesso à lista de experimentos")
 			printlog("FALHA F2: tentativa ilegal de acesso à lista de experimentos")
 			return None
 		exp = self.LIST[idx]
@@ -384,8 +376,6 @@ class LIST_OF_EXPERIMENTS:
 	#no final, mostro tudo que já foi finalizado
 	def finishing_experiment(self, idx):
 		if(idx >= self.MAX_EXPERIMENTS):
-			if CFG.VERBOSE:
-				print("FALHA F3: tentativa ilegal de acesso à lista de experimentos")
 			printlog("FALHA F3: tentativa ilegal de acesso à lista de experimentos")
 			return None
 		exp = self.LIST[idx]
@@ -426,50 +416,34 @@ class LIST_OF_EXPERIMENTS:
 	
 	#mostra todos os processos em execução no momento
 	def print_list_of_experiment_in_execution(self):
-		if CFG.VERBOSE:
-			print("Simulações que estão sendo executadas:")
 		printlog("Simulações que estão sendo executadas:")
 		for exp in self.LIST:
 			if(exp.executed):
 				if(not exp.finished):
 					exp.printable()
-		if CFG.VERBOSE:
-			print()
 		printlog()
 					
 	#mostra todos os processos já finalizados
 	def print_list_of_experiment_finalized(self):
-		if CFG.VERBOSE:
-			print("Lista de simulações finalizadas")
 		printlog("Lista de simulações finalizadas")
 		for exp in self.LIST:
 			if(exp.finished):
 				exp.printable()
-		if CFG.VERBOSE:
-			print()
 		printlog()
 
 	#mostra todos os processos aguardando execução
 	def print_list_of_experiment_waiting(self):
-		if CFG.VERBOSE:
-			print("Lista de simulações aguardando na fila:")
 		printlog("Lista de simulações aguardando na fila:")
 		for exp in self.LIST:
 			if(not exp.executed):
 				exp.printable()
-		if CFG.VERBOSE:
-			print()
 		printlog()
 	
 	#mostra todos os processos da lista
 	def print_list_of_experiment(self):
-		if CFG.VERBOSE:
-			print("Lista completa de simulações")
 		printlog("Lista completa de simulações")
 		for exp in self.LIST:
 			exp.printable()
-		if CFG.VERBOSE:
-			print()
 		printlog()
 	
 	#função específica para treinos
@@ -482,8 +456,6 @@ class LIST_OF_EXPERIMENTS:
 	#função que exporta em linha de comando todos os experimentos
 	def export_commands(self):
 		for exp in self.LIST:
-			if CFG.VERBOSE:
-				print(exp.command)
 			printlog(exp.command)
 			
 	#exporta a classe inteira para um arquivo de backup
@@ -493,8 +465,6 @@ class LIST_OF_EXPERIMENTS:
 		jsoned = json.dumps(self, default=lambda o: o.__dict__)
 		backup_file.write(jsoned)
 		backup_file.close()
-		if CFG.VERBOSE:
-			print("Arquivo de backup finalizado")
 		printlog("Arquivo de backup finalizado")
 	
 	#carrega os dados salvos, caso houver algum arquivo de backup
@@ -518,15 +488,9 @@ class LIST_OF_EXPERIMENTS:
 						exp.executed = False
 				self.LIST.append(exp)
 			backup_file.close()
-			if CFG.VERBOSE:
-				print("Recarregamento dos dados efetuada com sucesso")
 			printlog("Recarregamento dos dados efetuada com sucesso")
-			if CFG.VERBOSE:
-				print("Os experimentos finalizados até o momento:")
 			printlog("Os experimentos finalizados até o momento:")
 			self.print_list_of_experiment_finalized()
-			if CFG.VERBOSE:
-				print()
 			printlog()
 			return True
 		return False

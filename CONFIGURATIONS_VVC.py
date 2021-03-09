@@ -16,11 +16,11 @@
 ################################################################################
 #                                                                              #
 #                                                                              #
-#                         #   #  #####  #        #  #####                      #
-#                         #   #  #       #      #   #                          #
-#                         #####  ###      #    #    #                          #
-#                         #   #  #         #  #     #                          #
-#                         #   #  #####      ##      #####                      #
+#                         #        # #        #  #####                         #
+#                          #      #   #      #   #                             #
+#                           #    #     #    #    #                             #
+#                            #  #       #  #     #                             #
+#                             ##         ##      #####                         #
 #                                                                              #
 #                                                                              #
 ################################################################################
@@ -42,15 +42,15 @@
 ## Ativação de Funcionalidades ##
 #################################
 
-#Precisa baixar o HM?
+#Precisa baixar o VTM?
 DOWNLOAD = False
 
 #Se precisar que o download do HM seja regredido para alguma versão passada
 #então modifique o texto abaixo para a versão requerida. Utilize somente os
-#seis primeiros caracteres da versão, por exemplo '16.10+SCM-8.0'
+#seis primeiros caracteres da versão, por exemplo 'VTM-1.0rc4'
 DOWNGRADE_TO = ''
 
-#Precisa compilar o HM?
+#Precisa compilar o VTM?
 COMPILE  = False
 
 #Quer realizar somente uma única simulação, para ver alguma coisa específica?
@@ -90,7 +90,7 @@ CQ_LIST = [22, 27, 32, 37]
 ##EXTRA_PARAMS = [] # sem parâmetros extras, 1 conjunto de experimento
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0'] # UM parâmetro extra, 2 conjuntos de experimentos
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0', ' --min-partition-size=16 --max-partition-size=64'] # DOIS parâmetros, 3 conjuntos
-EXTRA_PARAMS = [' --DisableIntraInInter']
+EXTRA_PARAMS = [' --QTBT=1']
 
 
 
@@ -121,7 +121,7 @@ WAITING_TIME = 30
 MAX_CORES = len(ALLOWED_CORES)
 
 #nome do codificador. Se houver alguma mudança, mude aqui
-CODEC_NAME = 'TAppEncoderStatic'
+CODEC_NAME = 'EncoderAppStatic'
 
 #tipo de extensão do vídeo. PREFERENCIALMENTE Y4M.
 #MAS caso tu preferir utilizar YUV, modifique a função GENERATE_COMMAND
@@ -139,16 +139,16 @@ VIDEO_EXTENSION = '.yuv'
 # >>>
 #>>>  ATENÇÃO: Todas devem estar na mesma pasta atual do projeto!!!!  <<<
 # >>>
-CODEC_PATHS = ['HM']
+CODEC_PATHS = ['VTM']
 
 #caminhos das pastas dos vídeos separados por resolução
 VIDEOS_PATH = {
 	'240p': '/home/alex/Videos/objective-2-slow/class_A2/',
-	'360p': '/home/alex/Videos/objective-2-slow/class_B/',
+	'360p': '/home/alex/Videos/objective-2-slow/class_B2/',
 	'720p': '/home/alex/Videos/objective-2-slow/class_C2/',
-	'1080p': '/home/alex/Videos/objective-2-slow/class_D/',
-	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E/',
-	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F/'
+	'1080p': '/home/alex/Videos/objective-2-slow/class_D2/',
+	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E2/',
+	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F2/'
 }
 
 #Lista de vídeos a serem utilizados
@@ -191,8 +191,8 @@ VIDEOS_LIST = [
 #	['720p', 'FourPeople_1280x720_60_120f',                        1280, 720, 420,  8, 120], # [80.1,  5.2]
 #	['720p', 'gipsrestat720p_120f',                                1280, 720, 420,  8, 120], # [88.1,  5.0]
 #	['720p', 'Johnny_1280x720_60_120f',                            1280, 720, 420,  8, 120], # [64.2,  3.9]
-	['720p', 'KristenAndSara_1280x720_60_120f',                    1280, 720, 420,  8, 120], # [85.9,  3.9] **
-#	['720p', 'Netflix_DinnerScene_1280x720_60fps_8bit_420_120f',   1280, 720, 420,  8, 120], # [18.9,  2.5] **
+#	['720p', 'KristenAndSara_1280x720_60_120f',                    1280, 720, 420,  8, 120], # [85.9,  3.9] **
+	['720p', 'Netflix_DinnerScene_1280x720_60fps_8bit_420_120f',   1280, 720, 420,  8, 120], # [18.9,  2.5] **
 #	['720p', 'Netflix_DrivingPOV_1280x720_60fps_8bit_420_120f',    1280, 720, 420,  8, 120], # [89.5, 15.2] **
 #	['720p', 'Netflix_FoodMarket2_1280x720_60fps_8bit_420_120f',   1280, 720, 420,  8, 120], # [75.1, 28.3] **
 #	['720p', 'Netflix_RollerCoaster_1280x720_60fps_8bit_420_120f', 1280, 720, 420,  8, 120], # [56.8, 22.2]
@@ -282,7 +282,7 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	#definindo os valores de informação do vídeo
 	video_params = ''
 	if(VIDEO_EXTENSION == ".yuv"):
-		video_params = ' -wdt ' + str(width) + ' -hgt ' + str(height) + ' -cf ' + str(subsample) + ' --InputBitDepth=' + str(bitdepth) + ' --OutputBitDepth=' + str(bitdepth) + ' --InternalBitDepth=' + str(bitdepth) + ' -fr 30'
+		video_params = ' -wdt ' + str(width) + ' -hgt ' + str(height) + ' -cf ' + str(subsample) + ' --InputBitDepth=' + str(bitdepth) + ' --OutputBitDepth=' + str(bitdepth) + ' --InternalBitDepth=' + str(bitdepth) + ' --FrameRate=30'
 	
 	#definindo a quantização
 	#A princípio, se ao invés do QP, for utilizar bitrate, basta trocar a linha para:
@@ -294,18 +294,15 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	
 	#definindo o arquivo de saída do vídeo codificado
 	
-	webm_param  = ' -b ' + this_folder + 'video/coded_' + path_id +  ep_name + '.h265'
-	webm_param += ' -o ' + this_folder + 'video/coded_' + path_id +  ep_name + '.yuv'
+	webm_param  = ' --BitstreamFile=' + this_folder + 'video/coded_' + path_id +  ep_name + '.h266'
+	webm_param += ' --ReconFile=' + this_folder + 'video/coded_' + path_id +  ep_name + '.yuv'
 	
 	#definindo aonde que ficará salvo as saídas do codificador
 	output_filename = this_folder + 'log/out_' + path_id +  ep_name + '.log'
 	output_param = ' > ' + output_filename + ' 2>&1'
 	
 	#definindo outras configurações gerais para o libaom
-	if bitdepth == 10:
-		fixed_param = ' -c ' + folder + '_' + path_id + '/../HM/cfg/encoder_randomaccess_main10.cfg'
-	else:
-		fixed_param = ' -c ' + folder + '_' + path_id + '/../HM/cfg/encoder_randomaccess_main.cfg'
+	fixed_param = ' -c ' + folder + '/../VTM/cfg/encoder_randomaccess_vtm.cfg --Verbosity=4'
 	
 	#Criando a linha de comando completa
 	codec_command  = taskset_param
@@ -316,10 +313,10 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	codec_command += video_params
 	codec_command += extra_param #normalmente vazio, mas pode conter parâmetros presente em EXTRA_PARAMS
 	codec_command += webm_param
-	codec_command += ' -i ' + video_path
+	codec_command += ' --InputFile=' + video_path
 	codec_command += output_param + ' &'
 	#o & comercial no final serve para colocar o processo em segundo plano!
-	
+	print(codec_command)
 	#retornando a linha de comando e o arquivo de saída
 	return codec_command, output_filename
 	
@@ -336,23 +333,22 @@ def get_psnr_bitrate_time(from_file):
 	interesting_line = 0
 	
 	for lst_line in f:
-		if "SUMMARY" in lst_line:
+		if "Total Frames" in lst_line:
 			foundSummary = True
 		if foundSummary:
 			interesting_line += 1
-			#Somente na terceira linha após o summary é que 
+			#Somente a segunda linha após o "Total Frames" é que 
 			#os dados de bitrate e psnr estão posicionados
-			if(interesting_line == 3):
+			if(interesting_line == 2):
 				interesting_line = lst_line
 				foundSummary = False
-		pass
 	f.close()
 	
 	#Neste momento, eu tenho duas variáveis
 	#interesting_line, cujos dados estão como
-	#	        5    a    5327.2800   44.2158   47.1400   48.4901   44.8564
+	#5    a    2738.2080   43.2481   43.8931   45.5898   43.3501
 	#lst_line, cujos dados estão como
-	# Total Time:       51.451 sec.
+	# Total Time:       30.291 sec. [user]       30.294 sec. [elapsed]
 	
 	#O tempo é mais fácil de se pegar.
 	#primeiro crio um vetor com o texto
@@ -360,17 +356,17 @@ def get_psnr_bitrate_time(from_file):
 	#depois removo elementos vazios desse vetor
 	lst_line = list(filter(lambda a: len(a) > 0, lst_line))
 	#Agora tenho o vetor abaixo, só me interessa o terceiro elemento
-	#['Total', 'Time:', '51.451', 'sec.\n']
-	time = float(lst_line[2])
+	#['Total', 'Time:', 30.291, 'sec.', '[user]', 30.294, 'sec.', '[elapsed]']
+	time = float(lst_line[2]) * 1000 #transformando seg em ms
 	
 	#O bitrate e o PSNR-Y, seguem uma lógica parecida. Separo e depois limpo
 	interesting_line = interesting_line.split(' ')
 	interesting_line = list(filter(lambda a: len(a) > 0, interesting_line))
 	#O vetor abaixo é o que eu obtenho, me interessam os elementos 4 e 5
-	#['\t', '5', 'a', '5327.2800', '44.2158', '47.1400', '48.4901', '44.8564', '\n']
+	#['\t', '5', 'a', '2738.2080', '43.2481', '43.8931', '45.5898', '43.3501', '\n']
 	
-	psnr_y = float(interesting_line[3])
-	bitrate = float(interesting_line[4])
+	psnr_y = float(interesting_line[4])
+	bitrate = float(interesting_line[3])
 	
 	return psnr_y, bitrate, time
 	
@@ -387,12 +383,13 @@ def DO_DOWNLOAD(codec_path):
 	#já que não posso atualizar uma variável global
 	HM_VERSION = DOWNGRADE_TO
 	#Identifica se o usuário deseja uma versão específica
+	
+	#O caminho geral é sempre o mesmo
+	url = 'https://jvet.hhi.fraunhofer.de/svn/svn_VVCSoftware_VTM/tags/'
+	
 	if HM_VERSION == '':
-		#Em caso não quiser, então tenho que procurar a versão mais atualizada do HM
-		
-		#O caminho geral é sempre o mesmo
-		url = 'https://hevc.hhi.fraunhofer.de/svn/svn_HEVCSoftware/tags/'
-		
+		#Em caso não quiser, então tenho que procurar a versão mais atualizada do VTM
+	
 		#Baixo o conteúdo do index.html
 		response = urllib.request.urlopen(url)
 		webContent = response.read()
@@ -407,9 +404,9 @@ def DO_DOWNLOAD(codec_path):
 		for line in lines:
 			#Faço um try, pois há linhas no html que não possuem a versão do HM
 			try:
-				#Aqui terei uma linha como essa: HM-1.0/">HM-1.0/</a></li>
-				#Quero pegar somente o texto até o '/', E já aproveito para retirar o 'HM-'
-				version = str(line).split('/')[0][5:]
+				#Aqui terei uma linha como essa: VTM-1.0/">VTM-1.0/</a></li>
+				#Quero pegar somente o texto até o '/', E já aproveito para retirar o 'VTM-'
+				version = str(line).split('/')[0][6:]
 				#Há um problema, a versão 16.20 é superior ao 16.3, mas se eu transformar
 				#em float direto, isso não vai ser seguido. Portanto, preciso adicionar
 				#um zero entre o ponto e o número, para transformar 16.3 em 16.03
@@ -432,13 +429,13 @@ def DO_DOWNLOAD(codec_path):
 		
 		#Depois de juntar todas as versões, organizo elas em ordem numérica
 		AllVersions = dict(sorted(AllVersions.items(), key=lambda item: item[1]))
-		
+		print(AllVersions)
 		#Para todos os fins, só me interessa a última versão
 		#Já adiciono o HM- que removi anteriormente
-		HM_VERSION = 'HM-' + list(AllVersions)[-1]
+		HM_VERSION = 'VTM-' + list(AllVersions)[-1]
 		
 		
-	command_line = 'svn checkout https://hevc.hhi.fraunhofer.de/svn/svn_HEVCSoftware/tags/' + HM_VERSION + '/'
+	command_line = 'svn checkout ' + url + HM_VERSION + '/'
 	command_line += ' && mv ' + HM_VERSION + ' ' + CODEC_PATHS[0]
 	
 	#executa a linha de comando
@@ -449,29 +446,20 @@ def DO_DOWNLOAD(codec_path):
 #O código já adapta para possíveis versões diferentes de sistema operacional
 def DO_COMPILE(os_version, codec_path):
 	
-	#OBSERVACAO:
-	#o codec_path vai incluir uma pasta que não existe, chamada /bin
-	#Por isso, sempre coloco um ../ depois de codec_path
-
-	if(os.path.exists(codec_path)):
+	#O VTM cria uma pasta bin, logo, preciso criar outra
+	codec_build = codec_path[:-1] + '_build/'
+	
+	
+	#se precisar compilar o libaom, então COMPILA
+	if(os.path.exists(codec_build)):
 		#se a pasta já existe, apagar tudo pra deixar uma compilação limpa
-		os.system('make -C ' + codec_path + '../build/linux clean')
+		os.system('rm -rf ' + codec_build)
 		os.system('rm -rf ' + codec_path)
+	os.system('mkdir ' + codec_build)
 	
-	#Eu preciso que a pasta /bin exista
-	os.system('mkdir ' + codec_path)
+	cmake_command = 'cd ' + codec_build + ' && cmake -DCMAKE_BUILD_TYPE=Release ..'
+	make_command = 'cd ' + codec_build + ' && make'
 	
-	#Não sei se faz diferença, atualmente estou testando apenas no Ubuntu 18.04
-	make_command = 'make -C ' + codec_path + '../build/linux all'
-	
-	#if os_version == 18.04:
-	#	#Em algumas máquinas, dá pra rodar a linha de baixo. O libaom fica especializado
-	#	cmake_command = 'cd ' + codec_path + ' && cmake ..'
-	#elif os_version > 18.04:
-	#	#Mas na maioria não, daí tem que compilar de forma genérica:
-	#	cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic ..'
-	#else:
-	#	#Em caso de ubuntu mais velho, utilizar a seguinte chamada:
-	#	cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
-	
+	os.system(cmake_command)
 	os.system(make_command)
+	
