@@ -277,7 +277,10 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	#definindo os valores de informação do vídeo
 	video_params = ''
 	if(VIDEO_EXTENSION == ".yuv"):
-		video_params = ' --width=' + str(width) + ' --height=' + str(height) + ' --i' + str(subsample) + ' --bit-depth=' + str(bitdepth) + ' --fps=30/1'
+		video_params = ' --width=' + str(width) + ' --height=' + str(height) + ' --i' + str(subsample) + ' --fps=30/1'
+	
+	if bitdepth == 10:
+		video_params += ' --profile=2 --bit-depth=' + str(bitdepth)
 	
 	#definindo a quantização
 	#A princípio, se ao invés do CQ, for utilizar bitrate, basta trocar a linha para:
@@ -400,16 +403,8 @@ def DO_COMPILE(os_version, codec_path):
 		os.system('rm -rf ' + codec_path)
 	os.system('mkdir ' + codec_path)
 	
-	cmake_command = 'cd ' + codec_path + ' && ../configure'
-#	if os_version == 18.04:
-#		#Em algumas máquinas, dá pra rodar a linha de baixo. O libaom fica especializado
-#		cmake_command = 'cd ' + codec_path + ' && cmake ..'
-#	elif os_version > 18.04:
-#		#Mas na maioria não, daí tem que compilar de forma genérica:
-#		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic ..'
-#	else:
-#		#Em caso de ubuntu mais velho, utilizar a seguinte chamada:
-#		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
+	cmake_command = 'cd ' + codec_path + ' && ../configure --enable-vp9-highbitdepth'
 	make_command = 'cd ' + codec_path + ' && make'
+
 	os.system(cmake_command)
 	os.system(make_command)
