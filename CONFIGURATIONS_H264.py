@@ -283,7 +283,10 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	video_params = ''
 	if(VIDEO_EXTENSION == ".yuv"):
 		video_params = ' -p SourceWidth=' + str(width) + ' -p SourceHeight=' + str(height) + ' -p FrameRate=30'
-		
+	
+	if bitdepth == 10:
+		video_params += ' -p SourceBitDepthLuma=10 -p SourceBitDepthChroma=10 -p OutputBitDepthLuma=10 -p OutputBitDepthChroma=10'
+	
 	#definindo a quantização
 	#A princípio, se ao invés do QP, for utilizar bitrate, basta trocar a linha para:
 	cq_param = ' -p QPISlice=' + cq + ' -p QPPSlice=' + cq
