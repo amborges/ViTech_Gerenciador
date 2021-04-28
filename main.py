@@ -494,7 +494,11 @@ class LIST_OF_EXPERIMENTS:
 			printlog()
 			return True
 		return False
-
+		
+	#Retorna o percentual de experimentos finalizados
+	def get_percentage_of_experiments_completed(self):
+		percentage = (self.TOTAL_FINALIZED / self.MAX_EXPERIMENTS) * 100
+		return "{:.2f}".format(percentage)
 
 
 ####################
@@ -827,6 +831,8 @@ if CFG.EXECUTE:
 						list_of_experiments.execute_experiment_by_idx(list_index[idxList])
 			
 			printlog("\nEsperando Simulações em Andamento\n")
+			#Vou forçar isso aparecer no terminal, sempre
+			print(list_of_experiments.get_percentage_of_experiments_completed() + "% concluido\n")
 			sleep(CFG.WAITING_TIME)
 	
 	#todas as simulações estão rodando, mas...

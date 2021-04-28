@@ -69,10 +69,10 @@ VERBOSE = True
 
 #Lista de núcleos que podem ser utilizados, lembre sempre de deixar pelo menos
 #um único núcleo para o sistema operacional.
-ALLOWED_CORES = [0, 1]
+ALLOWED_CORES = [0, 1, 2]
 
 #Lista de CQs a serem utilizados, deixe descomentado o que tu preferir
-CQ_LIST = [20, 32, 43, 55] #short list
+CQ_LIST = [20] #short list
 #CQ_LIST = [20, 24, 28, 32, 36, 39, 43, 47, 51, 55] #full list
 
 #Parâmetros extras que podem ser incluídos ao codificador. 
@@ -166,7 +166,7 @@ VIDEOS_LIST = [
 #	['240p', 'mozzoom_240p_120f',   426, 240, 420, 8, 57],  # [91.6,  33.4] **
 	
 #CLASS_B
-	['360p', 'blue_sky_360p_120f',           640, 360, 420,  8, 120], # [136.3, 34.2] **
+#	['360p', 'blue_sky_360p_120f',           640, 360, 420,  8, 120], # [136.3, 34.2] **
 #	['360p', 'controlled_burn_640x360_120f', 640, 360, 420,  8, 120], # [101.2,  3.0]
 #	['360p', 'desktop2360p_120f',            640, 360, 420,  8, 120], # [114.5, 10.3]
 #	['360p', 'kirland360p_120f',             640, 360, 420,  8, 120], # [ 44.6,  2.3]
@@ -178,7 +178,7 @@ VIDEOS_LIST = [
 #	['360p', 'shields2_640x360_120f',        640, 360, 420,  8, 120], # [105.7, 27.5]
 #	['360p', 'snow_mnt_640x360_120f',        640, 360, 420,  8, 120], # [140.9,  2.3]
 #	['360p', 'speed_bag_640x360_120f',       640, 360, 420,  8, 120], # [ 48.0, 12.6]
-	['360p', 'stockholm_640x360_120f',       640, 360, 420,  8, 120], # [ 91.9, 19.2] **
+#	['360p', 'stockholm_640x360_120f',       640, 360, 420,  8, 120], # [ 91.9, 19.2] **
 #	['360p', 'tacomanarrows360p_120f',       640, 360, 420,  8, 120], # [ 78.2,  2.2] **
 #	['360p', 'thaloundeskmtg360p_120f',      640, 360, 420,  8, 120], # [169.8,  5.8] **
 #	['360p', 'water_hdr_amazon_360p',        640, 360, 420, 10,  60], # [ 30.9,  1.8] **
@@ -224,7 +224,7 @@ VIDEOS_LIST = [
 #	['1080p', 'touchdown_pass_1080p_60f',                                1920, 1080, 420,  8, 60], # [ 55.7, 11.2]
 
 #CLASS_E
-#	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
+	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
 #	['1080pscc', 'DOTA2_60f_420',           1920, 1080, 420, 8, 60], # [ 73.0,  7.8]
 #	['1080pscc', 'EuroTruckSimulator2_60f', 1920, 1080, 444, 8, 60], # [ 95.8, 27.7] **
 #	['1080pscc', 'Hearthstone_60f',         1920, 1080, 444, 8, 60], # [ 91.2,  4.3]
@@ -277,10 +277,7 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	#definindo os valores de informação do vídeo
 	video_params = ''
 	if(VIDEO_EXTENSION == ".yuv"):
-		video_params = ' --width=' + str(width) + ' --height=' + str(height) + ' --i' + str(subsample) + ' --fps=30/1'
-	
-	if bitdepth == 10:
-		video_params += ' --profile=2 --bit-depth=' + str(bitdepth)
+		video_params = ' --width=' + str(width) + ' --height=' + str(height) + ' --i' + str(subsample) + ' --bit-depth=' + str(bitdepth) + ' --fps=30/1'
 	
 	#definindo a quantização
 	#A princípio, se ao invés do CQ, for utilizar bitrate, basta trocar a linha para:
@@ -296,6 +293,9 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	
 	#definindo outras configurações gerais para o libaom
 	fixed_param = ' --verbose --psnr --frame-parallel=0 --tile-columns=0 --passes=2 --cpu-used=0 --threads=1 --kf-min-dist=1000 --kf-max-dist=1000 --lag-in-frames=19'
+	
+	if(subsample == 444):
+		video_params += ' --profile=1'
 	
 	#Criando a linha de comando completa
 	codec_command  = taskset_param
@@ -403,8 +403,16 @@ def DO_COMPILE(os_version, codec_path):
 		os.system('rm -rf ' + codec_path)
 	os.system('mkdir ' + codec_path)
 	
-	cmake_command = 'cd ' + codec_path + ' && ../configure --enable-vp9-highbitdepth'
+	cmake_command = 'cd ' + codec_path + ' && ../configure'
+#	if os_version == 18.04:
+#		#Em algumas máquinas, dá pra rodar a linha de baixo. O libaom fica especializado
+#		cmake_command = 'cd ' + codec_path + ' && cmake ..'
+#	elif os_version > 18.04:
+#		#Mas na maioria não, daí tem que compilar de forma genérica:
+#		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic ..'
+#	else:
+#		#Em caso de ubuntu mais velho, utilizar a seguinte chamada:
+#		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
 	make_command = 'cd ' + codec_path + ' && make'
-
 	os.system(cmake_command)
 	os.system(make_command)

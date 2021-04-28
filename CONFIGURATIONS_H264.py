@@ -42,7 +42,7 @@
 ## Ativação de Funcionalidades ##
 #################################
 
-#Precisa baixar o HM?
+#Precisa baixar o JM?
 DOWNLOAD = False
 
 #Se precisar que o download do HM seja regredido para alguma versão passada
@@ -50,7 +50,7 @@ DOWNLOAD = False
 #seis primeiros caracteres da versão, por exemplo 'jm15.0'
 DOWNGRADE_TO = ''
 
-#Precisa compilar o HM?
+#Precisa compilar o JM?
 COMPILE  = False
 
 #Quer realizar somente uma única simulação, para ver alguma coisa específica?
@@ -74,7 +74,7 @@ ALLOWED_CORES = [0, 1, 2]
 #Lista de QPs a serem utilizados, deixe descomentado o que tu preferir
 #Sei que tá CQ_LIST, mas no AV1 é CQ. A ideia é a mesma
 #Se quiser utilizar mais valores, é só adicionar
-CQ_LIST = [22, 27, 32, 37]
+CQ_LIST = [22]
 
 
 #Parâmetros extras que podem ser incluídos ao codificador. 
@@ -90,7 +90,7 @@ CQ_LIST = [22, 27, 32, 37]
 ##EXTRA_PARAMS = [] # sem parâmetros extras, 1 conjunto de experimento
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0'] # UM parâmetro extra, 2 conjuntos de experimentos
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0', ' --min-partition-size=16 --max-partition-size=64'] # DOIS parâmetros, 3 conjuntos
-EXTRA_PARAMS = [' -p IntraPeriod=3']
+EXTRA_PARAMS = []
 
 
 
@@ -100,7 +100,7 @@ EXTRA_PARAMS = [' -p IntraPeriod=3']
 
 #Quantidade de quadros a ser executado (frames to be executed)
 #Se deixar com valor negativo, então o vídeo inteiro será codificado
-FTBE = 5
+FTBE = 10
 
 #tempo de espera para verificar os processos em pilha (em segundos)
 #Quanto mais curto, mais vezes ele faz uma leitura dos processos
@@ -143,12 +143,12 @@ CODEC_PATHS = ['JM']
 
 #caminhos das pastas dos vídeos separados por resolução
 VIDEOS_PATH = {
-	'240p': '/home/alex/Videos/objective-2-slow/class_A2/',
-	'360p': '/home/alex/Videos/objective-2-slow/class_B2/',
-	'720p': '/home/alex/Videos/objective-2-slow/class_C2/',
-	'1080p': '/home/alex/Videos/objective-2-slow/class_D2/',
-	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E2/',
-	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F2/'
+	'240p': '/home/alex/Videos/objective-2-slow/class_A/',
+	'360p': '/home/alex/Videos/objective-2-slow/class_B/',
+	'720p': '/home/alex/Videos/objective-2-slow/class_C/',
+	'1080p': '/home/alex/Videos/objective-2-slow/class_D/',
+	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E/',
+	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F/'
 }
 
 #Lista de vídeos a serem utilizados
@@ -168,7 +168,7 @@ VIDEOS_LIST = [
 #	['240p', 'mozzoom_240p_120f',   426, 240, 420, 8, 57],  # [91.6,  33.4] **
 	
 #CLASS_B
-	['360p', 'blue_sky_360p_120f',           640, 360, 420,  8, 120], # [136.3, 34.2] **
+#	['360p', 'blue_sky_360p_120f',           640, 360, 420,  8, 120], # [136.3, 34.2] **
 #	['360p', 'controlled_burn_640x360_120f', 640, 360, 420,  8, 120], # [101.2,  3.0]
 #	['360p', 'desktop2360p_120f',            640, 360, 420,  8, 120], # [114.5, 10.3]
 #	['360p', 'kirland360p_120f',             640, 360, 420,  8, 120], # [ 44.6,  2.3]
@@ -180,7 +180,7 @@ VIDEOS_LIST = [
 #	['360p', 'shields2_640x360_120f',        640, 360, 420,  8, 120], # [105.7, 27.5]
 #	['360p', 'snow_mnt_640x360_120f',        640, 360, 420,  8, 120], # [140.9,  2.3]
 #	['360p', 'speed_bag_640x360_120f',       640, 360, 420,  8, 120], # [ 48.0, 12.6]
-	['360p', 'stockholm_640x360_120f',       640, 360, 420,  8, 120], # [ 91.9, 19.2] **
+#	['360p', 'stockholm_640x360_120f',       640, 360, 420,  8, 120], # [ 91.9, 19.2] **
 #	['360p', 'tacomanarrows360p_120f',       640, 360, 420,  8, 120], # [ 78.2,  2.2] **
 #	['360p', 'thaloundeskmtg360p_120f',      640, 360, 420,  8, 120], # [169.8,  5.8] **
 #	['360p', 'water_hdr_amazon_360p',        640, 360, 420, 10,  60], # [ 30.9,  1.8] **
@@ -226,7 +226,7 @@ VIDEOS_LIST = [
 #	['1080p', 'touchdown_pass_1080p_60f',                                1920, 1080, 420,  8, 60], # [ 55.7, 11.2]
 
 #CLASS_E
-#	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
+	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
 #	['1080pscc', 'DOTA2_60f_420',           1920, 1080, 420, 8, 60], # [ 73.0,  7.8]
 #	['1080pscc', 'EuroTruckSimulator2_60f', 1920, 1080, 444, 8, 60], # [ 95.8, 27.7] **
 #	['1080pscc', 'Hearthstone_60f',         1920, 1080, 444, 8, 60], # [ 91.2,  4.3]
@@ -242,7 +242,7 @@ VIDEOS_LIST = [
 #	['uhd4k', 'Netflix_Narrator_4096x2160_60fps_10bit_420_60f',        4096, 2160, 420, 10, 60], # [22.2,  6.9]
 #	['uhd4k', 'Netflix_RitualDance_4096x2160_60fps_10bit_420_60f',     4096, 2160, 420, 10, 60], # [25.3, 17.7] **
 #	['uhd4k', 'Netflix_ToddlerFountain_4096x2160_60fps_10bit_420_60f', 4096, 2160, 420, 10, 60], # [51.7, 32.0] **
-#	['uhd4k', 'Netflix_WindAndNature_4096x2160_60fps_10bit_420_60f',   4096, 2160, 420, 10, 60], # [42.9,  8.4]
+	['uhd4k', 'Netflix_WindAndNature_4096x2160_60fps_10bit_420_60f',   4096, 2160, 420, 10, 60], # [42.9,  8.4]
 #	['uhd4k', 'street_hdr_amazon_2160p',                               3840, 2160, 420, 10, 60], # [32.5,  5.4]
 ]
 
@@ -283,10 +283,7 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	video_params = ''
 	if(VIDEO_EXTENSION == ".yuv"):
 		video_params = ' -p SourceWidth=' + str(width) + ' -p SourceHeight=' + str(height) + ' -p FrameRate=30'
-	
-	if bitdepth == 10:
-		video_params += ' -p SourceBitDepthLuma=10 -p SourceBitDepthChroma=10 -p OutputBitDepthLuma=10 -p OutputBitDepthChroma=10'
-	
+		
 	#definindo a quantização
 	#A princípio, se ao invés do QP, for utilizar bitrate, basta trocar a linha para:
 	cq_param = ' -p QPISlice=' + cq + ' -p QPPSlice=' + cq
@@ -305,6 +302,16 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	
 	#definindo outras configurações gerais para o libaom
 	fixed_param = ' -d ' + codec_path + 'encoder.cfg'
+	
+	if (subsample == 444):
+		fixed_param += ' -p ProfileIDC=244'
+		
+	if (height >= 2160):
+		fixed_param += ' -p LevelIDC=60'
+	elif (height >= 1080):
+		fixed_param += ' -p LevelIDC=50'
+	
+	
 	
 	#Criando a linha de comando completa
 	codec_command  = taskset_param

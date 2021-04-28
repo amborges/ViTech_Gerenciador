@@ -74,7 +74,7 @@ ALLOWED_CORES = [0, 1, 2]
 #Lista de QPs a serem utilizados, deixe descomentado o que tu preferir
 #Sei que tá CQ_LIST, mas no AV1 é CQ. A ideia é a mesma
 #Se quiser utilizar mais valores, é só adicionar
-CQ_LIST = [22, 27, 32, 37]
+CQ_LIST = [22]
 
 
 #Parâmetros extras que podem ser incluídos ao codificador. 
@@ -90,7 +90,7 @@ CQ_LIST = [22, 27, 32, 37]
 ##EXTRA_PARAMS = [] # sem parâmetros extras, 1 conjunto de experimento
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0'] # UM parâmetro extra, 2 conjuntos de experimentos
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0', ' --min-partition-size=16 --max-partition-size=64'] # DOIS parâmetros, 3 conjuntos
-EXTRA_PARAMS = [' --DisableIntraInInter']
+EXTRA_PARAMS = []
 
 
 
@@ -143,9 +143,9 @@ CODEC_PATHS = ['HM']
 
 #caminhos das pastas dos vídeos separados por resolução
 VIDEOS_PATH = {
-	'240p': '/home/alex/Videos/objective-2-slow/class_A2/',
+	#'240p': '/home/alex/Videos/objective-2-slow/class_A/', #Não dá pra usar essa resolução
 	'360p': '/home/alex/Videos/objective-2-slow/class_B/',
-	'720p': '/home/alex/Videos/objective-2-slow/class_C2/',
+	'720p': '/home/alex/Videos/objective-2-slow/class_C/',
 	'1080p': '/home/alex/Videos/objective-2-slow/class_D/',
 	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E/',
 	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F/'
@@ -186,12 +186,12 @@ VIDEOS_LIST = [
 #	['360p', 'water_hdr_amazon_360p',        640, 360, 420, 10,  60], # [ 30.9,  1.8] **
 
 #CLASS_C
-	['720p', 'boat_hdr_amazon_720p',                               1280, 720, 420, 10,  60], # [54.8,  9.2] **
+#	['720p', 'boat_hdr_amazon_720p',                               1280, 720, 420, 10,  60], # [54.8,  9.2] **
 #	['720p', 'dark720p_120f',                                      1280, 720, 420,  8, 120], # [43.3,  6.9]
 #	['720p', 'FourPeople_1280x720_60_120f',                        1280, 720, 420,  8, 120], # [80.1,  5.2]
 #	['720p', 'gipsrestat720p_120f',                                1280, 720, 420,  8, 120], # [88.1,  5.0]
 #	['720p', 'Johnny_1280x720_60_120f',                            1280, 720, 420,  8, 120], # [64.2,  3.9]
-	['720p', 'KristenAndSara_1280x720_60_120f',                    1280, 720, 420,  8, 120], # [85.9,  3.9] **
+#	['720p', 'KristenAndSara_1280x720_60_120f',                    1280, 720, 420,  8, 120], # [85.9,  3.9] **
 #	['720p', 'Netflix_DinnerScene_1280x720_60fps_8bit_420_120f',   1280, 720, 420,  8, 120], # [18.9,  2.5] **
 #	['720p', 'Netflix_DrivingPOV_1280x720_60fps_8bit_420_120f',    1280, 720, 420,  8, 120], # [89.5, 15.2] **
 #	['720p', 'Netflix_FoodMarket2_1280x720_60fps_8bit_420_120f',   1280, 720, 420,  8, 120], # [75.1, 28.3] **
@@ -226,7 +226,7 @@ VIDEOS_LIST = [
 #	['1080p', 'touchdown_pass_1080p_60f',                                1920, 1080, 420,  8, 60], # [ 55.7, 11.2]
 
 #CLASS_E
-#	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
+	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
 #	['1080pscc', 'DOTA2_60f_420',           1920, 1080, 420, 8, 60], # [ 73.0,  7.8]
 #	['1080pscc', 'EuroTruckSimulator2_60f', 1920, 1080, 444, 8, 60], # [ 95.8, 27.7] **
 #	['1080pscc', 'Hearthstone_60f',         1920, 1080, 444, 8, 60], # [ 91.2,  4.3]
@@ -301,11 +301,13 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	output_filename = this_folder + 'log/out_' + path_id +  ep_name + '.log'
 	output_param = ' > ' + output_filename + ' 2>&1'
 	
-	#definindo outras configurações gerais para o libaom
-	if bitdepth == 10:
-		fixed_param = ' -c ' + folder + '_' + path_id + '/../HM/cfg/encoder_randomaccess_main10.cfg'
+	#definindo outras configurações gerais para o HM
+	if subsample == 444:
+		fixed_param = ' -c ' + folder + '/../HM/cfg/encoder_randomaccess_main_rext.cfg'			
+	elif bitdepth == 10:
+		fixed_param = ' -c ' + folder + '/../HM/cfg/encoder_randomaccess_main10.cfg'
 	else:
-		fixed_param = ' -c ' + folder + '_' + path_id + '/../HM/cfg/encoder_randomaccess_main.cfg'
+		fixed_param = ' -c ' + folder + '/../HM/cfg/encoder_randomaccess_main.cfg'
 	
 	#Criando a linha de comando completa
 	codec_command  = taskset_param
@@ -438,7 +440,7 @@ def DO_DOWNLOAD(codec_path):
 		HM_VERSION = 'HM-' + list(AllVersions)[-1]
 		
 		
-	command_line = 'svn checkout https://hevc.hhi.fraunhofer.de/svn/svn_HEVCSoftware/tags/' + HM_VERSION + '/'
+	command_line = 'svn checkout ' + url + HM_VERSION + '/'
 	command_line += ' && mv ' + HM_VERSION + ' ' + CODEC_PATHS[0]
 	
 	#executa a linha de comando

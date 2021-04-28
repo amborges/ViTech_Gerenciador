@@ -43,7 +43,7 @@
 #################################
 
 #Precisa baixar o libaom?
-DOWNLOAD = False
+DOWNLOAD = True
 
 #Se precisar que o download do libaom seja regredido para alguma versão passada
 #então modifique o texto abaixo para a versão requerida. Utilize somente os
@@ -51,7 +51,7 @@ DOWNLOAD = False
 DOWNGRADE_TO = ''
 
 #Precisa compilar o libaom?
-COMPILE  = False
+COMPILE  = True
 
 #Quer realizar somente uma única simulação, para ver alguma coisa específica?
 TESTE    = False
@@ -88,7 +88,7 @@ CQ_LIST = [20, 32, 43, 55] #short list
 ##EXTRA_PARAMS = [] # sem parâmetros extras, 1 conjunto de experimento
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0'] # UM parâmetro extra, 2 conjuntos de experimentos
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0', ' --min-partition-size=16 --max-partition-size=64'] # DOIS parâmetros, 3 conjuntos
-EXTRA_PARAMS = [' --enable-rect-partitions=0']
+EXTRA_PARAMS = []
 
 
 
@@ -137,7 +137,7 @@ VIDEO_EXTENSION = '.y4m'
 # >>>
 #>>>  ATENÇÃO: Todas devem estar na mesma pasta atual do projeto!!!!  <<<
 # >>>
-CODEC_PATHS = ['aom', 'aom2']
+CODEC_PATHS = ['aom']
 
 #caminhos das pastas dos vídeos separados por resolução
 VIDEOS_PATH = {
@@ -158,21 +158,21 @@ VIDEOS_PATH = {
 # [ RESOLUÇÃO, NOME DO VÍDEO, LARGURA, ALTURA, SUBAMOSTRAGEM, PROFUNDIDADE DE BITS, NUMERO DE QUADROS ]
 VIDEOS_LIST = [
 #CLASS_A
-#	['240p', 'bqfree_240p_120f',    426, 240, 420, 8, 120], # [124.4, 22.8]
-	['240p', 'bqhighway_240p_120f', 426, 240, 420, 8, 120], # [142.1, 14.3] **
-	['240p', 'bqzoom_240p_120f',    426, 240, 420, 8, 120], # [100.1, 12.3] **
-	['240p', 'chairlift_240p_120f', 426, 240, 420, 8, 64],  # [85.2,   8.2] **
+	['240p', 'bqfree_240p_120f',    426, 240, 420, 8, 120], # [124.4, 22.8]
+#	['240p', 'bqhighway_240p_120f', 426, 240, 420, 8, 120], # [142.1, 14.3] **
+#	['240p', 'bqzoom_240p_120f',    426, 240, 420, 8, 120], # [100.1, 12.3] **
+#	['240p', 'chairlift_240p_120f', 426, 240, 420, 8, 64],  # [85.2,   8.2] **
 #	['240p', 'dirtbike_240p_120f',  426, 240, 420, 8, 61],  # [72.4,   5.8] **
 #	['240p', 'mozzoom_240p_120f',   426, 240, 420, 8, 57],  # [91.6,  33.4] **
 	
 #CLASS_B
-#	['360p', 'blue_sky_360p_120f',           640, 360, 420,  8, 120], # [136.3, 34.2] **
+	['360p', 'blue_sky_360p_120f',           640, 360, 420,  8, 120], # [136.3, 34.2] **
 #	['360p', 'controlled_burn_640x360_120f', 640, 360, 420,  8, 120], # [101.2,  3.0]
 #	['360p', 'desktop2360p_120f',            640, 360, 420,  8, 120], # [114.5, 10.3]
 #	['360p', 'kirland360p_120f',             640, 360, 420,  8, 120], # [ 44.6,  2.3]
 #	['360p', 'mmstationary360p_120f',        640, 480, 420,  8, 120], # [ 68.9,  4.2]
 #	['360p', 'niklas360p_120f',              640, 360, 420,  8, 120], # [107.8, 11.3]
-#	['360p', 'rain2_hdr_amazon_360p',        640, 360, 420, 10,  60], # [ 48.4,  3.0]
+	['360p', 'rain2_hdr_amazon_360p',        640, 360, 420, 10,  60], # [ 48.4,  3.0]
 #	['360p', 'red_kayak_360p_120f',          640, 360, 420,  8, 120], # [ 72.5, 31.3]
 #	['360p', 'riverbed_360p25_120f',         640, 360, 420,  8, 120], # [ 72.8, 30.8]
 #	['360p', 'shields2_640x360_120f',        640, 360, 420,  8, 120], # [105.7, 27.5]
@@ -184,8 +184,8 @@ VIDEOS_LIST = [
 #	['360p', 'water_hdr_amazon_360p',        640, 360, 420, 10,  60], # [ 30.9,  1.8] **
 
 #CLASS_C
-#	['720p', 'boat_hdr_amazon_720p',                               1280, 720, 420, 10,  60], # [54.8,  9.2] **
-#	['720p', 'dark720p_120f',                                      1280, 720, 420,  8, 120], # [43.3,  6.9]
+	['720p', 'boat_hdr_amazon_720p',                               1280, 720, 420, 10,  60], # [54.8,  9.2] **
+	['720p', 'dark720p_120f',                                      1280, 720, 420,  8, 120], # [43.3,  6.9]
 #	['720p', 'FourPeople_1280x720_60_120f',                        1280, 720, 420,  8, 120], # [80.1,  5.2]
 #	['720p', 'gipsrestat720p_120f',                                1280, 720, 420,  8, 120], # [88.1,  5.0]
 #	['720p', 'Johnny_1280x720_60_120f',                            1280, 720, 420,  8, 120], # [64.2,  3.9]
@@ -201,10 +201,10 @@ VIDEOS_LIST = [
 #	['720p', 'vidyo4_720p_60fps_120f',                             1280, 720, 420,  8, 120], # [61.9,  7.7]
 
 #CLASS_D
-#	['1080p', 'aspen_1080p_60f',                                         1920, 1080, 420,  8, 60], # [ 35.0, 11.9]
+	['1080p', 'aspen_1080p_60f',                                         1920, 1080, 420,  8, 60], # [ 35.0, 11.9]
 #	['1080p', 'crowd_run_1080p50_60f',                                   1920, 1080, 420,  8, 60], # [108.2, 25.0] **
 #	['1080p', 'ducks_take_off_1080p50_60f',                              1920, 1080, 420,  8, 60], # [ 82.9, 12.5]
-#	['1080p', 'guitar_hdr_amazon_1080p',                                 1920, 1080, 420, 10, 60], # [ 22.9,  7.8] **
+	['1080p', 'guitar_hdr_amazon_1080p',                                 1920, 1080, 420, 10, 60], # [ 22.9,  7.8] **
 #	['1080p', 'life_1080p30_60f',                                        1920, 1080, 420,  8, 60], # [ 84.1, 16.9]
 #	['1080p', 'Netflix_Aerial_1920x1080_60fps_8bit_420_60f',             1920, 1080, 420,  8, 60], # [ 54.5, 10.3] **
 #	['1080p', 'Netflix_Boat_1920x1080_60fps_8bit_420_60f',               1920, 1080, 420,  8, 60], # [ 95.4, 19.9]
@@ -224,7 +224,7 @@ VIDEOS_LIST = [
 #	['1080p', 'touchdown_pass_1080p_60f',                                1920, 1080, 420,  8, 60], # [ 55.7, 11.2]
 
 #CLASS_E
-#	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
+	['1080pscc', 'CSGO_60f',                1920, 1080, 444, 8, 60], # [ 53.0,  8.5] **
 #	['1080pscc', 'DOTA2_60f_420',           1920, 1080, 420, 8, 60], # [ 73.0,  7.8]
 #	['1080pscc', 'EuroTruckSimulator2_60f', 1920, 1080, 444, 8, 60], # [ 95.8, 27.7] **
 #	['1080pscc', 'Hearthstone_60f',         1920, 1080, 444, 8, 60], # [ 91.2,  4.3]
@@ -235,13 +235,13 @@ VIDEOS_LIST = [
 
 #CLASS_F
 #	['uhd4k', 'Netflix_BarScene_4096x2160_60fps_10bit_420_60f',        4096, 2160, 420, 10, 60], # [14.2,  4.5] **
-#	['uhd4k', 'Netflix_BoxingPractice_4096x2160_60fps_10bit_420_60f',  4096, 2160, 420, 10, 60], # [40.7, 19.7] **
+	['uhd4k', 'Netflix_BoxingPractice_4096x2160_60fps_10bit_420_60f',  4096, 2160, 420, 10, 60], # [40.7, 19.7] **
 #	['uhd4k', 'Netflix_Dancers_4096x2160_60fps_10bit_420_60f',         4096, 2160, 420, 10, 60], # [11.8,  6.7] **
 #	['uhd4k', 'Netflix_Narrator_4096x2160_60fps_10bit_420_60f',        4096, 2160, 420, 10, 60], # [22.2,  6.9]
 #	['uhd4k', 'Netflix_RitualDance_4096x2160_60fps_10bit_420_60f',     4096, 2160, 420, 10, 60], # [25.3, 17.7] **
 #	['uhd4k', 'Netflix_ToddlerFountain_4096x2160_60fps_10bit_420_60f', 4096, 2160, 420, 10, 60], # [51.7, 32.0] **
 #	['uhd4k', 'Netflix_WindAndNature_4096x2160_60fps_10bit_420_60f',   4096, 2160, 420, 10, 60], # [42.9,  8.4]
-#	['uhd4k', 'street_hdr_amazon_2160p',                               3840, 2160, 420, 10, 60], # [32.5,  5.4]
+	['uhd4k', 'street_hdr_amazon_2160p',                               3840, 2160, 420, 10, 60], # [32.5,  5.4]
 ]
 
 

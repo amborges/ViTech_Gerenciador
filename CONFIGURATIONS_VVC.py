@@ -90,7 +90,7 @@ CQ_LIST = [22, 27, 32, 37]
 ##EXTRA_PARAMS = [] # sem parâmetros extras, 1 conjunto de experimento
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0'] # UM parâmetro extra, 2 conjuntos de experimentos
 ##EXTRA_PARAMS = [' --enable-rect-partitions=0', ' --min-partition-size=16 --max-partition-size=64'] # DOIS parâmetros, 3 conjuntos
-EXTRA_PARAMS = [' --QTBT=1']
+EXTRA_PARAMS = []
 
 
 
@@ -143,12 +143,12 @@ CODEC_PATHS = ['VTM']
 
 #caminhos das pastas dos vídeos separados por resolução
 VIDEOS_PATH = {
-	'240p': '/home/alex/Videos/objective-2-slow/class_A2/',
-	'360p': '/home/alex/Videos/objective-2-slow/class_B2/',
-	'720p': '/home/alex/Videos/objective-2-slow/class_C2/',
-	'1080p': '/home/alex/Videos/objective-2-slow/class_D2/',
-	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E2/',
-	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F2/'
+	#'240p': '/home/alex/Videos/objective-2-slow/class_A/', #Não dá pra usar essa resolução
+	'360p': '/home/alex/Videos/objective-2-slow/class_B/',
+	'720p': '/home/alex/Videos/objective-2-slow/class_C/',
+	'1080p': '/home/alex/Videos/objective-2-slow/class_D/',
+	'1080pscc': '/home/alex/Videos/objective-2-slow/class_E/',
+	'uhd4k': '/home/alex/Videos/objective-2-slow/class_F/'
 }
 
 #Lista de vídeos a serem utilizados
