@@ -72,9 +72,9 @@ A princípio o script requer pouco consumo de memória e de processamento. Todav
 	
 O valor após '-c' poderá ser qualquer um dos números de cores permitidos para uso, desde que não esteja presente na variável ALLOWED_CORES.
 
-Caso tu utilizar de acesso remoto para realização das simulações, tome cuidado! A maioria dos serviços de acesso remoto destroem programas que foram inicializadas pelo usuário, quando este finaliza o acesso. Há diversas formas de evitar com que isso aconteça. A que eu utilizo é realizar a chamada ao script com 'nohop', que bloqueia a chamada executada de sinais de encerramento. Para utilizar, basta digitar:
+Caso tu utilizar de acesso remoto para realização das simulações, tome cuidado! A maioria dos serviços de acesso remoto destroem programas que foram inicializadas pelo usuário, quando este finaliza o acesso. Há diversas formas de evitar com que isso aconteça. A que eu utilizo é realizar a chamada ao script com 'nohup', que bloqueia a chamada executada de sinais de encerramento. Para utilizar, basta digitar:
 
-	$nohop python3 main.py &
+	$nohup python3 main.py &
 
 
 

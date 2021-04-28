@@ -278,6 +278,11 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	video_params = ''
 	if(VIDEO_EXTENSION == ".yuv"):
 		video_params = ' --width=' + str(width) + ' --height=' + str(height) + ' --i' + str(subsample) + ' --bit-depth=' + str(bitdepth) + ' --fps=30/1'
+		
+	if(subsample == 444):
+		video_params += ' --profile=1'
+	elif (bitdepth == 10):
+		video_params += ' --profile=2 --bit-depth=' + str(bitdepth)
 	
 	#definindo a quantização
 	#A princípio, se ao invés do CQ, for utilizar bitrate, basta trocar a linha para:
@@ -293,9 +298,6 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	
 	#definindo outras configurações gerais para o libaom
 	fixed_param = ' --verbose --psnr --frame-parallel=0 --tile-columns=0 --passes=2 --cpu-used=0 --threads=1 --kf-min-dist=1000 --kf-max-dist=1000 --lag-in-frames=19'
-	
-	if(subsample == 444):
-		video_params += ' --profile=1'
 	
 	#Criando a linha de comando completa
 	codec_command  = taskset_param

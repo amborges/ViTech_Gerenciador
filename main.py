@@ -7,6 +7,13 @@
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
+#                                            Versão 1.2.2, 28 de abril de 2021 #
+#                                                                              #
+# Melhorias em relação à versão 1.2.1:                                         #
+# - Adicionado uma chamada para mostrar o percentual de experimentos que já    #
+# foram concluídos ao longo da execução. Desta forma, fica mais fácil de se    #
+# acompanhar.                                                                  #
+#                                                                              #
 #                                        Versão 1.2.1, 13 de fevereiro de 2021 #
 #                                                                              #
 # Correções:                                                                   #
