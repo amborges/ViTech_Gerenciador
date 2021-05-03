@@ -278,6 +278,8 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, path_id, extra_pa
 	limit_param = ''
 	if(FTBE > 0):
 		limit_param = ' -f ' + str(FTBE)
+	else:
+		limit_param = ' -f ' + str(num_frames)
 	
 	#definindo os valores de informação do vídeo
 	video_params = ''
