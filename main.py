@@ -7,6 +7,27 @@
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #                                                                              #
+#                                                                              #
+#                                              Versão 1.3, 25 de junho de 2021 #
+#                                                                              #
+# Melhorias em relação à versão 1.2.2:                                         #
+# - Faz a leitura dos dados de quadros por unidade e tamanho da unidade, de    #
+# modo a dar suporte para vídeos com FPS diferentes;                           #
+# - Cria subpastas de CQ, independente se a pasta do nome do arquivo já exista.#
+# Antes era necessário apagar a pasta do arquivo para criar novos cqs, agora   #
+# não é mais preciso;                                                          #
+# - parâmetros extras foram adicionados na criação da linha de comando, de modo#
+# a possibilitar maior versatilidade na execução;                              #
+# - A sequência de vídeos foram separados dos arquivos de configurações;       #
+# - Os arquivos de configuração foram separados em uma pasta própria, a fim de #
+# permitir que a pasta principal fique mais limpa e organizada.                #
+#                                                                              #
+# Problemas conhecidos:                                                        #
+# - O script não atualiza o csv em alguns casos, provavelmente por conflito de #
+# arquivos na hora de salvar. Solução prevista: separar o processo de salvar o #
+# csv durante a execução e colocar para o final da execução do script.         #
+#                                                                              #
+#                                                                              #
 #                                            Versão 1.2.2, 28 de abril de 2021 #
 #                                                                              #
 # Melhorias em relação à versão 1.2.1:                                         #
@@ -166,10 +187,17 @@ except:
 	import numpy as np
 	##pacote requerido pelo BD-rate
 	import scipy.interpolate
-	
-#Esse é o arquivo de configuração
-import CONFIGURATIONS as CFG
 
+	
+#Selecionar o arquivo de configuração desejado
+#import CFG.CONFIGURATIONS_AV1  as CFG
+#import CFG.CONFIGURATIONS_H264 as CFG
+#import CFG.CONFIGURATIONS_HEVC as CFG
+import CFG.CONFIGURATIONS_VP9  as CFG
+#import CFG.CONFIGURATIONS_VVC  as CFG
+
+#Esse é o arquivo de vídeos
+import CFG.VIDEOS_SEQUENCES as VIDEOS
 
 
 #####################
@@ -198,13 +226,15 @@ class EXPERIMENT:
 	             idx = 0, 
 	             core = 0, 
 	             cq = 0, 
-	             resolution = CFG.VIDEOS_LIST[0][0],
-	             video = CFG.VIDEOS_LIST[0][1],
-	             width = CFG.VIDEOS_LIST[0][2],
-	             height = CFG.VIDEOS_LIST[0][3],
-	             subsample = CFG.VIDEOS_LIST[0][4],
-	             bitdepth = CFG.VIDEOS_LIST[0][5],
-	             num_frames = CFG.VIDEOS_LIST[0][6],
+	             resolution = VIDEOS.VIDEOS_LIST[0][0],
+	             video = VIDEOS.VIDEOS_LIST[0][1],
+	             width = VIDEOS.VIDEOS_LIST[0][2],
+	             height = VIDEOS.VIDEOS_LIST[0][3],
+	             subsample = VIDEOS.VIDEOS_LIST[0][4],
+	             bitdepth = VIDEOS.VIDEOS_LIST[0][5],
+	             num_frames = VIDEOS.VIDEOS_LIST[0][6],
+	             frames_per_unit = VIDEOS.VIDEOS_LIST[0][7],
+	             num_unit = VIDEOS.VIDEOS_LIST[0][8],
 	             codec_folder = '', 
 	             extra_param = '', 
 	             is_there_many_set_of_experiments = False):
@@ -217,7 +247,7 @@ class EXPERIMENT:
 		#nome do vídeo/pasta do experimento
 		self.video_name = video.replace(CFG.VIDEO_EXTENSION, '')
 		#caminho completo do vídeo
-		self.video_file = CFG.VIDEOS_PATH[resolution] + video + CFG.VIDEO_EXTENSION
+		self.video_file = VIDEOS.VIDEOS_PATH[resolution] + video + CFG.VIDEO_EXTENSION
 		#identificador se o vídeo já foi enviado para processamento
 		self.executed = False
 		#identificador se o vídeo já finalizou seu processamento
@@ -238,6 +268,10 @@ class EXPERIMENT:
 		self.subsample = subsample
 		#numero de quadros exitentes no vídeo
 		self.num_frames = num_frames 
+		#numero de frames por unidade de tempo
+		self.frames_per_unit = frames_per_unit
+		#tamanho da unidade de tempo
+		self.num_unit = num_unit
 		
 		#quando finalizar, eu já posso capturar os dados para cálculos de BD-rate
 		self.psnr_y = None
@@ -254,13 +288,16 @@ class EXPERIMENT:
 		                                                    self.video_name,
 		                                                    self.video_file,
 		                                                    codec_path,
+		                                                    HOME_PATH,
 		                                                    self.codec_folder,
 		                                                    self.extra_param,
 		                                                    self.width,
 		                                                    self.height,
 		                                                    self.subsample,
 		                                                    self.bitdepth,
-		                                                    self.num_frames)
+		                                                    self.num_frames,
+		                                                    self.frames_per_unit,
+		                                                    self.num_unit)
 		#texto de identificação do processo no terminal
 		cmd = self.command.split(CFG.CODEC_NAME)[1]
 		cmd = cmd.split(CFG.VIDEO_EXTENSION)[0]
@@ -319,7 +356,7 @@ class LIST_OF_EXPERIMENTS:
 		more_than_one_set_of_experiments = len(extra_params) > 1
 		
 		#de cada vídeo e cada CQ e cada configuração extra, gero os experimentos
-		for resolution, video, width, height, subsample, bitdepth, num_frames in CFG.VIDEOS_LIST:
+		for resolution, video, width, height, subsample, bitdepth, num_frames, frames_per_unit, num_unit in VIDEOS.VIDEOS_LIST:
 			for cq in CFG.CQ_LIST:
 				for extra_p in extra_params:
 					for codec_path in CFG.CODEC_PATHS:
@@ -333,6 +370,8 @@ class LIST_OF_EXPERIMENTS:
 									     subsample,
 									     bitdepth,
 									     num_frames,
+									     frames_per_unit,
+									     num_unit,
 									     codec_path,
 									     extra_p,
 									     more_than_one_set_of_experiments)
@@ -368,7 +407,9 @@ class LIST_OF_EXPERIMENTS:
 		#criar nova pasta
 		if(not os.path.exists(exp.video_name)):
 			os.system('mkdir ' + exp.video_name)
-			for cq in CFG.CQ_LIST:
+		#Para cada CQ que se vai usar, criar pasta, caso não existir
+		for cq in CFG.CQ_LIST:
+			if(not os.path.exists(exp.video_name + '/cq_' + str(cq))):
 				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq))
 				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/log')
 				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/video')
@@ -504,7 +545,7 @@ class LIST_OF_EXPERIMENTS:
 		
 	#Retorna o percentual de experimentos finalizados
 	def get_percentage_of_experiments_completed(self):
-		percentage = (self.TOTAL_FINALIZED / self.MAX_EXPERIMENTS) * 100
+		percentage = (self.TOTAL_FINALIZED / (self.MAX_EXPERIMENTS + 1) ) * 100
 		return "{:.2f}".format(percentage)
 
 
@@ -866,11 +907,11 @@ if CFG.EXECUTE:
 		#a ideia geral: matrix[codec][video][extra_param][cq].append([psnr, bitrate, time])
 		M3D = [None] * len(CFG.CODEC_PATHS)
 		for v in range(len(CFG.CODEC_PATHS)):
-			M3D[v] = [None] * len(CFG.VIDEOS_LIST)
+			M3D[v] = [None] * len(VIDEOS.VIDEOS_LIST)
 			video_keys = []
-			for i in range(len(CFG.VIDEOS_LIST)):
+			for i in range(len(VIDEOS.VIDEOS_LIST)):
 				#A lista de vídeos é um array duplo, só me interessa um dos valores
-				video_keys.append(CFG.VIDEOS_LIST[i][1])
+				video_keys.append(VIDEOS.VIDEOS_LIST[i][1])
 				M3D[v][i] = [None] * len(extra_params)
 				for j in range(len(extra_params)):
 					M3D[v][i][j] = [None] * len(CFG.CQ_LIST)
