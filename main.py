@@ -191,6 +191,7 @@ except:
 	
 #Selecionar o arquivo de configuração desejado
 #import CFG.CONFIGURATIONS_AV1  as CFG
+#import CFG.CONFIGURATIONS_AV3  as CFG
 #import CFG.CONFIGURATIONS_H264 as CFG
 #import CFG.CONFIGURATIONS_HEVC as CFG
 import CFG.CONFIGURATIONS_VP9  as CFG
