@@ -192,6 +192,7 @@ except:
 #Selecionar o arquivo de configuração desejado
 #import CFG.CONFIGURATIONS_AV1  as CFG
 #import CFG.CONFIGURATIONS_AV3  as CFG
+#import CFG.CONFIGURATIONS_EVC  as CFG
 #import CFG.CONFIGURATIONS_H264 as CFG
 #import CFG.CONFIGURATIONS_HEVC as CFG
 import CFG.CONFIGURATIONS_VP9  as CFG
@@ -281,6 +282,7 @@ class EXPERIMENT:
 		
 		#Gero o caminho completo onde está o codificador
 		codec_path = '/'.join([HOME_PATH, codec_folder, 'bin/'])
+		codec_path = codec_path.replace('//', '/')
 		
 		#linha de comando que será aplicado ao experimento
 		#e também é obtido o arquivo de log após o fim do experimento
@@ -771,6 +773,7 @@ if CFG.COMPILE:
 	#para cada pasta de codec, compilar
 	for codec in CFG.CODEC_PATHS:
 		codec_path = '/'.join([HOME_PATH, codec, 'bin/'])
+		codec_path = codec_path.replace('//', '/')
 		CFG.DO_COMPILE(float(ubuntu_version), codec_path)
 
 
