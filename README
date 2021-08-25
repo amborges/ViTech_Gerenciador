@@ -89,3 +89,31 @@ Após finalizarem todos os experimentos, é recomendável excluir o arquivo back
 Se por alguma razão o script gerenciador for encerrado antes de finalizar todas as simulações, mas ainda restar simulações em andamento. FINALIZE AS EXECUÇõES antes de re-executar o script novamente. Pois com a ausência do script na pilha de processos em execução, o arquivo de backup não será atualizado, portanto, qualquer simulação em andamento não será salvo no backup.json e nem os seus resultados. Executar o script mesmo com as simulações em andamento irá gerar conflito de arquivos por parte do codificador e disputa de acesso ao processador.
 
 Em caso de real necessidade de reaproveitamento da simulação finalizada após encerramento do script gerenciador, é possível modificar o arquivo backup.json diretamente para que o script gerenciador reconheça aquela simulação como finalizada. Para tanto, é preciso modificar os campos 'executed', 'finished', 'psnr_y', 'bitrate' e 'time' daquela simulação desejada.
+
+
+###########################
+# DISPOSIÇÃO DOS ARQUIVOS #
+###########################
+
+LICENCE
+README
+main.py
+CFG/
+    CONFIGURATIONS_AV1.py
+    CONFIGURATIONS_AVS3.py
+    CONFIGURATIONS_EVC.py
+    CONFIGURATIONS_H.264.py
+    CONFIGURATIONS_HEVC.py
+    CONFIGURATIONS_VP9.py
+    CONFIGURATIONS_VVC.py
+    EVC_cfg/
+        encoder_randomaccess_baseline.cfg
+%a partir daqui, é repetido para todos os vídeos testados
+{VIDEO_NAME}/
+    summary_of_all_data.csv
+    summary_of_BD-rate_Time.csv
+    cq_{NUM}/
+        log/
+            out_{codec}_{configuration}.log
+        video/
+            coded_{codec}_{configuration}.{video_format_extension}
