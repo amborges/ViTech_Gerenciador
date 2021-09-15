@@ -6,9 +6,9 @@
 #                  Grupo de Pesquisa Video Technology Research Group -- ViTech #
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
-# script de configuração compatível com o arquivo main.py versão 1.3           #
+# script de configuração compatível com o arquivo main.py versão 1.4           #
 ################################################################################
-
+__COMPATIBLE_WITH_VERSION__ = 1.4
 
 
 ################################################################################
@@ -59,6 +59,12 @@ TESTE    = False
 #É para executar de fato o experimento, com todas as simulações possíveis?
 EXECUTE  = True
 
+#É para calcular as métricas de codificação
+METRICS = True
+
+#É para gerar o gráfico da curva de BD-Rate?
+PLOT = True
+
 #Quer que mostre na tela o estado geral das simulações?
 #Caso opte por False, o arquivo de log ainda será gerado.
 VERBOSE = False
@@ -100,18 +106,7 @@ EXTRA_PARAMS = []
 
 #Quantidade de quadros a ser executado (frames to be executed)
 #Se deixar com valor negativo, então o vídeo inteiro será codificado
-FTBE = 3
-
-#tempo de espera para verificar os processos em pilha (em segundos)
-#Quanto mais curto, mais vezes ele faz uma leitura dos processos
-#em um mesmo período de tempo. Tente ser razoável, por exemplo, 
-#tu vai executar somente vídeos UHD4K, sabe-se que eles levam pelo
-#menos uns três dias (chegando a sete em alguns casos) para codificar.
-#Neste caso, não faz o menor sentido verificar o processo a cada 30seg.
-#Para esse caso específico, uma vez por dia tá bom (86400). Agora
-#se tu vai usar o setup completo de vídeos, uma vez a cada uma hora 
-#tá de bom tamanho (3600)
-WAITING_TIME = 30
+FTBE = 10
 
 #Número máximo de núcleos que podem ser utilizados simultaneamente
 #Em geral, se tu selecionou os cores disponíveis, é pq eles podem
@@ -150,7 +145,6 @@ CODEC_PATHS = ['HM']
 
 #entradas vindas da classe LIST_OF_EXPERIMENTS, esses valores não são alteráveis.
 #todos os valores são do tipo texto.
-#   core, número do núcleo em que o experimento vai ser executado
 #   cq, valor de quantização (CQ ou QP)
 #   folder, nome da pasta em que o experimento será executado
 #   video_path, caminho completo do vídeo que será codificado
@@ -165,7 +159,7 @@ CODEC_PATHS = ['HM']
 #   num_frames, número de quadros que há no vídeo
 #   frames_per_unit, número de frames por unidade de tempo do vídeo
 #   unit_size, tamanho da unidade de tempo do vídeo em segundos
-def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, home_path, path_id, extra_param, width, height, subsample, bitdepth, num_frames, frames_per_unit, unit_size):
+def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, extra_param, width, height, subsample, bitdepth, num_frames, frames_per_unit, unit_size):
 	#criando cada parte da linha de comando. Lembrar do espaçamento entre os parâmetros
 	
 	#comando completo
@@ -182,9 +176,6 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, home_path, path_i
 	this_folder = home_path + '/' + folder + '/cq_' + cq + '/'
 	
 	#PARÂMETROS
-	
-	#definindo em qual núcleo o experimento será executado
-	taskset_param = 'taskset -c ' + core + ' '
 	
 	#definindo o caminho e nome do executável: ./TAppEncoderStatic
 	executable_param = codec_path + CODEC_NAME
@@ -241,8 +232,7 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, home_path, path_i
 	
 	
 	#Criando a linha de comando completa
-	codec_command  = taskset_param 
-	codec_command += executable_param 
+	codec_command  = executable_param 
 	codec_command += main_cfg_param 
 	codec_command += video_param 
 	codec_command += quant_param 
@@ -384,6 +374,7 @@ def DO_DOWNLOAD(codec_path):
 	os.system(command_line)
 
 
+import subprocess
 #Função que compila o HM
 #O código já adapta para possíveis versões diferentes de sistema operacional
 def DO_COMPILE(os_version, codec_path):
@@ -403,14 +394,11 @@ def DO_COMPILE(os_version, codec_path):
 	#Não sei se faz diferença, atualmente estou testando apenas no Ubuntu 18.04
 	make_command = 'make -C ' + codec_path + '../build/linux all'
 	
-	#if os_version == 18.04:
-	#	#Em algumas máquinas, dá pra rodar a linha de baixo. O libaom fica especializado
-	#	cmake_command = 'cd ' + codec_path + ' && cmake ..'
-	#elif os_version > 18.04:
-	#	#Mas na maioria não, daí tem que compilar de forma genérica:
-	#	cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic ..'
-	#else:
-	#	#Em caso de ubuntu mais velho, utilizar a seguinte chamada:
-	#	cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
+	if os_version > 18.04:
+		#na versão 20.04 dá alerta de erro: -Werror=class-memaccess
+		#solução é mandar adicionar a flag '-Wno-error=class-memaccess' em 
+		#todos os lugares onde aparecer '-Werror'
+		sed_command = "sed -i 's/-Werror/-Werror -Wno-error=class-memaccess/g' HM/build/linux/common/makefile.base"
+		subprocess.call(sed_command, shell=True)
 	
 	os.system(make_command)

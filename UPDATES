@@ -1,0 +1,156 @@
+################################################################################
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+# |   Script desenvolvido por Alex Borges, amborges@inf.ufpel.edu.br.        | #
+# |        Grupo de Pesquisa Video Technology Research Group -- ViTech       | #
+# |                 Universidade Federal de Pelotas -- UFPel                 | #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+################################################################################
+
+################################################################################
+#                                                                              #
+#                       Versão 1.4, 14 de setembro de 2021                     #
+#                                                                              #
+# Melhorias em relação à versão 1.3:                                           #
+# - A principal modificação é a alteração da fila de execuções. Agora, ao invés#
+# de cada núcleo do processador ter uma fila própria, que é definida no início #
+# da execução desse script, há uma fila geral e compartilhada. Quando um núcleo#
+# é liberado, este requisita um processo novo para executar;                   #
+# - A fila deixou de ser um vetor de controle manual para ser uma fila própria #
+# do python: Queue() do tipo FIFO. Com isso eu consigo garantir segurança em   #
+# momentos de concorrência;                                                    #
+# - Para não deixar que o núcleo fique muito tempo ocioso na espera por um novo#
+# processo, tive que remover a variável WAITING_TIME dos arquivos de           #
+# configuração;                                                                #
+# - Adicionei a variável METRICS nos arquivos de configuração para indicar ao  # script que ele deve fazer a leitura dos csv's de forma a gerar as métricas de  #
+# codificação;                                                                 #
+# - Adicionei a variável PLOT nos arquivos de configuração para indicar ao     #
+# script que, caso estiver realizando o cálculo das métricas de codificação,   #
+# também é para gerar o gráfico da curva de BD-Rate do experimento;            #
+# - O arquivo 'backup.json' foi atualizado, agora ele possui tamanho dinâmico, #
+# apenas armazenando os processos que não finalizaram. Dessa forma, caso todos #
+# os experimentos já tiverem sido finalizados, esse arquivo ficará vazio. Isso #
+# possibilita que o script identifique essa situação e possa ignorar o         #
+# 'backup.json' para iniciar o experimento desde o início;                     #
+# - Adicionei variável de controle de versionamento, assim facilita identificar#
+# incompatibilidades entre versões do script e arquivos de configuração;       #
+# - Para possibilitar as modificações acima, várias partes do script foram     #
+# atualizadas e otimizadas. Por exemplo, diversos atributos das classes foram  #
+# removidas e há alguns laços que foram otimizados;                            #
+# - Atualizei algumas coisas nos arquivos de configuração, visando corrigir    #
+# alguns pequenos problemas que foram encontrados durante a sua execução.      #
+#                                                                              #
+################################################################################
+
+################################################################################
+#                                                                              #
+#                        Versão 1.3, 25 de junho de 2021                       #
+#                                                                              #
+# Melhorias em relação à versão 1.2.2:                                         #
+# - Faz a leitura dos dados de quadros por unidade e tamanho da unidade, de    #
+# modo a dar suporte para vídeos com FPS diferentes;                           #
+# - Cria subpastas de CQ, independente se a pasta do nome do arquivo já exista.#
+# Antes era necessário apagar a pasta do arquivo para criar novos cqs, agora   #
+# não é mais preciso;                                                          #
+# - parâmetros extras foram adicionados na criação da linha de comando, de modo#
+# a possibilitar maior versatilidade na execução;                              #
+# - A sequência de vídeos foram separados dos arquivos de configurações;       #
+# - Os arquivos de configuração foram separados em uma pasta própria, a fim de #
+# permitir que a pasta principal fique mais limpa e organizada.                #
+#                                                                              #
+# Problemas conhecidos:                                                        #
+# - O script não atualiza o csv em alguns casos, provavelmente por conflito de #
+# arquivos na hora de salvar. Solução prevista: separar o processo de salvar o #
+# csv durante a execução e colocar para o final da execução do script.         #
+#                                                                              #
+################################################################################
+
+################################################################################
+#                                                                              #
+#                      Versão 1.2.2, 28 de abril de 2021                       #
+#                                                                              #
+# Melhorias em relação à versão 1.2.1:                                         #
+# - Adicionado uma chamada para mostrar o percentual de experimentos que já    #
+# foram concluídos ao longo da execução. Desta forma, fica mais fácil de se    #
+# acompanhar.                                                                  #
+#                                                                              #
+################################################################################
+
+################################################################################
+#                                                                              #
+#                    Versão 1.2.1, 13 de fevereiro de 2021                     #
+#                                                                              #
+# Correções:                                                                   #
+# - Às vezes o arquivo de log da codificação não é gerado corretamente por     #
+# algum erro durante a codificação. No momento em que o script tenta importar  #
+# os dados do log, acaba ocorrendo erro e trava o script. Para evitar isso, foi#
+# adicionado um try, evitando que o script gerenciador finalizasse a sua       #
+#execução antes de rodar todas as simulações. PROBLEMA: o cálculo de BD-rate   #
+# e sua curva não serão geradas, ocasionando em falha do script. Contudo, aqui #
+# já é no final do script e não há mais a urgência de refazer os experimentos. #
+#                                                                              #
+#                                                                              #
+# Problemas Conhecidos:                                                        #
+# - Caso alguma simulação não tenha os dados necessários para gerar o BD-rate, #
+# o script encerra por erro. É necessário adicionar um comando para refazer a  #
+# busca por esses dados e retornar um aviso em falha, sugerindo ao usuário     #
+# para repetir alguma simulação que tenha dado problema.                       #
+#                                                                              #
+#                                                                              #
+# Melhorias em relação à versão 1.2:                                           #
+# - Havia duplicata de linhas para a função print e printlog. Unifiquei;       #
+#                                                                              #
+################################################################################
+
+################################################################################
+#                                                                              #
+#                      Versão 1.2, 10 de fevereiro de 2021                     #
+#                                                                              #
+# Correções:                                                                   #
+# - Alguns printlog estavam com vírgulas ao invés do +;                        #
+# - O arquivo csv só armazenava o último dado, troquei 'w' por 'a';            #
+#                                                                              #
+# Melhorias em relação à versão 1.1:                                           #
+# - Adicionado um controle de pacotes python. Caso algum não for possível de   #
+# ser importado, então vai se tentar atualizar todos;                          #
+# - Python3 3.8 não oferece mais suporte para platform.dist(), portanto, é     #
+# necessário atualizar o pacote para distro.linux_distribution(). Só que esse  #
+# pacote não é muito utilizado em versões antigas. Por isso, criei um try para #
+# decidir qual dos pacotes deve ser utilizado;                                 #
+# - Adicionado suporte para mais de uma versão de codificador, desde que       #
+# estejam em pastas separadas. BD-rate e arquivos csv já consideram esse modo  #
+# de simulação diferente.                                                      #
+# - Descobriu-se que a versão mínima do python para executar o script é a 3.5. #
+# Desta forma, foi incluído um condicional para realizar essa verificação e    #
+# permitir ou não a continuação do script.                                     #
+#                                                                              #
+################################################################################
+
+################################################################################
+#                                                                              #
+#                      Versão 1.1, 19 de Janeiro de 2021                       #
+#                                                                              #
+# Melhorias em relação à versão 1.0:                                           #
+# - Lê os arquivos de saída do libaom para capturar valores de psnr, bitrate e #
+# tempo;                                                                       #
+# - Exporta os valores capturados dos arquivos de saída para um csv;           #
+# - Gera o valor de BD-rate entre duas codificações;                           #
+# - Gera gráfico da curva de BD-rate;                                          #
+# - Calcula a razão de tempo entre duas codificações;                          #
+# - Exporta os valores de BD-rate e a razão do tempo para um csv;              #
+# - Compilação do libaom foi adequada para versões diferentes do Ubuntu;       #
+# - Funções dependentes de codificador foram extraídos de main.py e enviados   #
+# para CONFIGURATIONS.py;                                                      #
+# - Adicionei uma função extra para exportar todos os print do código para um  #
+# arquivo de log externo;                                                      #
+# - Adicionei controle de textos no terminal (opção verbose).                  #
+#                                                                              #
+# Problemas conhecidos:                                                        #
+# - Avisos de descontinuidade de funções do matplotlib.                        #
+#    Solução prevista: desativar esses alertas.                                #
+# - Identificação de Sistema Operacional Ubuntu, APENAS!                       #
+#    Solução prevista: quando eu tiver acesso a outros sistemas operacionais   #
+#    adaptarei o código para isso. Sugestões são bem vindas para melhorar a    #
+#    versatilidade do script.                                                  #
+#                                                                              #
+################################################################################
+

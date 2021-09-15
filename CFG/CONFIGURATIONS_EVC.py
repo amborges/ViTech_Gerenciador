@@ -6,9 +6,9 @@
 #                  Grupo de Pesquisa Video Technology Research Group -- ViTech #
 #                                     Universidade Federal de Pelotas -- UFPel #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
-# script de configuração compatível com o arquivo main.py versão 1.3           #
+# script de configuração compatível com o arquivo main.py versão 1.4           #
 ################################################################################
-
+__COMPATIBLE_WITH_VERSION__ = 1.4
 
 
 ################################################################################
@@ -43,7 +43,7 @@
 #################################
 
 #Precisa baixar o xeve?
-DOWNLOAD = False
+DOWNLOAD = True
 
 #Se precisar que o download do xeve seja regredido para alguma versão passada
 #então modifique o texto abaixo para a versão requerida. Utilize somente os
@@ -51,13 +51,19 @@ DOWNLOAD = False
 DOWNGRADE_TO = '017d3c'
 
 #Precisa compilar o xeve?
-COMPILE  = False
+COMPILE  = True
 
 #Quer realizar somente uma única simulação, para ver alguma coisa específica?
 TESTE    = False
 
 #É para executar de fato o experimento, com todas as simulações possíveis?
 EXECUTE  = True
+
+#É para calcular as métricas de codificação
+METRICS = True
+
+#É para gerar o gráfico da curva de BD-Rate?
+PLOT = True
 
 #Quer que mostre na tela o estado geral das simulações?
 #Caso opte por False, o arquivo de log ainda será gerado.
@@ -74,7 +80,7 @@ ALLOWED_CORES = [0, 1, 2]
 #Lista de QPs a serem utilizados, deixe descomentado o que tu preferir
 #Sei que tá CQ_LIST, mas no AV1 é CQ. A ideia é a mesma
 #Se quiser utilizar mais valores, é só adicionar
-CQ_LIST = [37]
+CQ_LIST = [22, 27, 32, 37]
 
 
 #Parâmetros extras que podem ser incluídos ao codificador. 
@@ -100,18 +106,7 @@ EXTRA_PARAMS = []
 
 #Quantidade de quadros a ser executado (frames to be executed)
 #Se deixar com valor negativo, então o vídeo inteiro será codificado
-FTBE = 5
-
-#tempo de espera para verificar os processos em pilha (em segundos)
-#Quanto mais curto, mais vezes ele faz uma leitura dos processos
-#em um mesmo período de tempo. Tente ser razoável, por exemplo, 
-#tu vai executar somente vídeos UHD4K, sabe-se que eles levam pelo
-#menos uns três dias (chegando a sete em alguns casos) para codificar.
-#Neste caso, não faz o menor sentido verificar o processo a cada 30seg.
-#Para esse caso específico, uma vez por dia tá bom (86400). Agora
-#se tu vai usar o setup completo de vídeos, uma vez a cada uma hora 
-#tá de bom tamanho (3600)
-WAITING_TIME = 30
+FTBE = 10
 
 #Número máximo de núcleos que podem ser utilizados simultaneamente
 #Em geral, se tu selecionou os cores disponíveis, é pq eles podem
@@ -150,7 +145,6 @@ CODEC_PATHS = ['xeve']
 
 #entradas vindas da classe LIST_OF_EXPERIMENTS, esses valores não são alteráveis.
 #todos os valores são do tipo texto.
-#   core, número do núcleo em que o experimento vai ser executado
 #   cq, valor de quantização (CQ ou QP)
 #   folder, nome da pasta em que o experimento será executado
 #   video_path, caminho completo do vídeo que será codificado
@@ -165,7 +159,7 @@ CODEC_PATHS = ['xeve']
 #   num_frames, número de quadros que há no vídeo
 #   frames_per_unit, número de frames por unidade de tempo do vídeo
 #   unit_size, tamanho da unidade de tempo do vídeo em segundos
-def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, home_path, path_id, extra_param, width, height, subsample, bitdepth, num_frames, frames_per_unit, unit_size):
+def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, extra_param, width, height, subsample, bitdepth, num_frames, frames_per_unit, unit_size):
 	#criando cada parte da linha de comando. Lembrar do espaçamento entre os parâmetros
 	
 	#comando completo
@@ -182,9 +176,6 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, home_path, path_i
 	this_folder = home_path + '/' + folder + '/cq_' + cq + '/'
 	
 	#PARÂMETROS
-	
-	#definindo em qual núcleo o experimento será executado
-	taskset_param = 'taskset -c ' + core + ' '
 	
 	#definindo o caminho e nome do executável: ./xeveenc
 	executable_param = codec_path + CODEC_NAME
@@ -224,8 +215,7 @@ def GENERATE_COMMAND(core, cq, folder, video_path, codec_path, home_path, path_i
 	logfile_param = ' > ' + output_filename + ' 2>&1'
 	
 	#Criando a linha de comando completa
-	codec_command  = taskset_param 
-	codec_command += executable_param 
+	codec_command  = executable_param 
 	codec_command += main_cfg_param 
 	codec_command += video_param 
 	codec_command += quant_param 
@@ -292,7 +282,6 @@ def get_psnr_bitrate_time(from_file):
 	
 
 import os
-import urllib.request, urllib.error, urllib.parse
 #Função que permite baixar o xeve
 def DO_DOWNLOAD(codec_path):
 	if(os.path.exists(codec_path)):

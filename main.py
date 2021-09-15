@@ -2,127 +2,32 @@
 
 ################################################################################
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
-#       Script desenvolvido por Alex Borges, amborges@inf.ufpel.edu.br.        #
-#                  Grupo de Pesquisa Video Technology Research Group -- ViTech #
-#                                     Universidade Federal de Pelotas -- UFPel #
+#	   Script desenvolvido por Alex Borges, amborges@inf.ufpel.edu.br.		   #
+#				  Grupo de Pesquisa Video Technology Research Group -- ViTech  #
+#									 Universidade Federal de Pelotas -- UFPel  #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
-#                                                                              #
-#                                                                              #
-#                                              Versão 1.3, 25 de junho de 2021 #
-#                                                                              #
-# Melhorias em relação à versão 1.2.2:                                         #
-# - Faz a leitura dos dados de quadros por unidade e tamanho da unidade, de    #
-# modo a dar suporte para vídeos com FPS diferentes;                           #
-# - Cria subpastas de CQ, independente se a pasta do nome do arquivo já exista.#
-# Antes era necessário apagar a pasta do arquivo para criar novos cqs, agora   #
-# não é mais preciso;                                                          #
-# - parâmetros extras foram adicionados na criação da linha de comando, de modo#
-# a possibilitar maior versatilidade na execução;                              #
-# - A sequência de vídeos foram separados dos arquivos de configurações;       #
-# - Os arquivos de configuração foram separados em uma pasta própria, a fim de #
-# permitir que a pasta principal fique mais limpa e organizada.                #
-#                                                                              #
-# Problemas conhecidos:                                                        #
-# - O script não atualiza o csv em alguns casos, provavelmente por conflito de #
-# arquivos na hora de salvar. Solução prevista: separar o processo de salvar o #
-# csv durante a execução e colocar para o final da execução do script.         #
-#                                                                              #
-#                                                                              #
-#                                            Versão 1.2.2, 28 de abril de 2021 #
-#                                                                              #
-# Melhorias em relação à versão 1.2.1:                                         #
-# - Adicionado uma chamada para mostrar o percentual de experimentos que já    #
-# foram concluídos ao longo da execução. Desta forma, fica mais fácil de se    #
-# acompanhar.                                                                  #
-#                                                                              #
-#                                        Versão 1.2.1, 13 de fevereiro de 2021 #
-#                                                                              #
-# Correções:                                                                   #
-# - Às vezes o arquivo de log da codificação não é gerado corretamente por     #
-# algum erro durante a codificação. No momento em que o script tenta importar  #
-# os dados do log, acaba ocorrendo erro e trava o script. Para evitar isso, foi#
-# adicionado um try, evitando que o script gerenciador finalizasse a sua       #
-#execução antes de rodar todas as simulações. PROBLEMA: o cálculo de BD-rate   #
-# e sua curva não serão geradas, ocasionando em falha do script. Contudo, aqui #
-# já é no final do script e não há mais a urgência de refazer os experimentos. #
-#                                                                              #
-#                                                                              #
-# Problemas Conhecidos:                                                        #
-# - Caso alguma simulação não tenha os dados necessários para gerar o BD-rate, #
-# o script encerra por erro. É necessário adicionar um comando para refazer a  #
-# busca por esses dados e retornar um aviso em falha, sugerindo ao usuário     #
-# para repetir alguma simulação que tenha dado problema.                       #
-#                                                                              #
-#                                                                              #
-# Melhorias em relação à versão 1.2:                                           #
-# - Havia duplicata de linhas para a função print e printlog. Unifiquei;       #
-#                                                                              #
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
-#                                                                              #
-#                                          Versão 1.2, 10 de fevereiro de 2021 #
-#                                                                              #
-# Correções:                                                                   #
-# - Alguns printlog estavam com vírgulas ao invés do +;                        #
-# - O arquivo csv só armazenava o último dado, troquei 'w' por 'a';            #
-#                                                                              #
-# Melhorias em relação à versão 1.1:                                           #
-# - Adicionado um controle de pacotes python. Caso algum não for possível de   #
-# ser importado, então vai se tentar atualizar todos;                          #
-# - Python3 3.8 não oferece mais suporte para platform.dist(), portanto, é     #
-# necessário atualizar o pacote para distro.linux_distribution(). Só que esse  #
-# pacote não é muito utilizado em versões antigas. Por isso, criei um try para #
-# decidir qual dos pacotes deve ser utilizado;                                 #
-# - Adicionado suporte para mais de uma versão de codificador, desde que       #
-# estejam em pastas separadas. BD-rate e arquivos csv já consideram esse modo  #
-# de simulação diferente.                                                      #
-# - Descobriu-se que a versão mínima do python para executar o script é a 3.5. #
-# Desta forma, foi incluído um condicional para realizar essa verificação e    #
-# permitir ou não a continuação do script.                                     #
-#                                                                              #
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
-#                                                                              #
-#                                            Versão 1.1, 19 de Janeiro de 2021 #
-#                                                                              #
-# Melhorias em relação à versão 1.0:                                           #
-# - Lê os arquivos de saída do libaom para capturar valores de psnr, bitrate e #
-# tempo;                                                                       #
-# - Exporta os valores capturados dos arquivos de saída para um csv;           #
-# - Gera o valor de BD-rate entre duas codificações;                           #
-# - Gera gráfico da curva de BD-rate;                                          #
-# - Calcula a razão de tempo entre duas codificações;                          #
-# - Exporta os valores de BD-rate e a razão do tempo para um csv;              #
-# - Compilação do libaom foi adequada para versões diferentes do Ubuntu;       #
-# - Funções dependentes de codificador foram extraídos de main.py e enviados   #
-# para CONFIGURATIONS.py;                                                      #
-# - Adicionei uma função extra para exportar todos os print do código para um  #
-# arquivo de log externo;                                                      #
-# - Adicionei controle de textos no terminal (opção verbose).                  #
-#                                                                              #
-# Problemas conhecidos:                                                        #
-# - Avisos de descontinuidade de funções do matplotlib.                        #
-#      Solução prevista: desativar esses alertas.                              #
-# - Identificação de Sistema Operacional Ubuntu, APENAS!                       #
-#      Solução prevista: quando eu tiver acesso a outros sistemas operacionais #
-#      adaptarei o código para isso. Sugestões são bem vindas para melhorar a  #
-#      versatilidade do script.                                                #
-#                                                                              #
+#																			   #
+#																			   #
+#											Versão 1.4, 14 de setembro de 2021 #
 ################################################################################
 
 
 
 
 ################################################################################
-###                Execução e Gerenciamento das Simulações                   ###
+###				Execução e Gerenciamento das Simulações				         ###
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -###
 ### Aqui neste script está toda a execução das simulações, tudo previamente  ###
-### preparado para lidar com as configurações realizadas no arquivo          ### 
-### CONFIGURATIONS.py. A princípio, nenhuma modificação é requerida aqui.    ###
+### preparado para lidar com as configurações realizadas no arquivo		     ### 
+### CONFIGURATIONS.py. A princípio, nenhuma modificação é requerida aqui.	 ###
 ### Eu suspeito ter conseguido realizar a generalização adequada. Claro, há  ###
-### condições e especificações bem pontuais de experimentos desejados por    ###
-### alguns pesquisadores, que fazem com que esse script não funcione como    ###
-### desejável. Modificações são bem vindas.                                  ###
+### condições e especificações bem pontuais de experimentos desejados por	 ###
+### alguns pesquisadores, que fazem com que esse script não funcione como	 ###
+### desejável. Modificações são bem vindas.								     S###
 ################################################################################
 
+
+__THIS_VERSION__ = 1.4
 
 
 ############################################
@@ -136,9 +41,9 @@ from subprocess import PIPE
 import sys
 
 if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
-    print("É necessário ter Python 3.5 or superior para utilizar este script!")
-    print("Atualmente você está utilizando a versão {}.{}.".format(sys.version_info.major, sys.version_info.minor))
-    sys.exit(1)
+	print("É necessário ter Python 3.5 or superior para utilizar este script!")
+	print("Atualmente você está utilizando a versão {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+	sys.exit(1)
 
 try:
 	#importações de pacotes python
@@ -149,6 +54,8 @@ try:
 	##pacote para compilação
 	import platform
 	import distro
+	##pacote requerido para manutenção da fila
+	import queue
 	##pacotes gráficos
 	import pandas as pd
 	import seaborn as sns
@@ -161,7 +68,7 @@ except:
 	print("Atualizando o pip")
 	subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
 	print("pip atualizado")
-	for package in ["pandas", "seaborn", "matplotlib", "numpy", "scipy", "json", "platform", "distro", "time"]:
+	for package in ["pandas", "seaborn", "matplotlib", "numpy", "scipy", "queue", "json", "platform", "distro", "time"]:
 		print("Tentando instalar o pacote ", package)
 		try:
 			subprocess.check_call([sys.executable, "-m", "pip", "install", package])
@@ -180,6 +87,8 @@ except:
 	from time import sleep
 	##pacote requerido pelo backup.json
 	import json
+	##pacote requerido para manutenção da fila
+	import queue
 	##pacotes gráficos
 	import pandas as pd
 	import seaborn as sns
@@ -191,15 +100,20 @@ except:
 	
 #Selecionar o arquivo de configuração desejado
 #import CFG.CONFIGURATIONS_AV1  as CFG
-#import CFG.CONFIGURATIONS_AV3  as CFG
+#import CFG.CONFIGURATIONS_AVS3  as CFG
 #import CFG.CONFIGURATIONS_EVC  as CFG
 #import CFG.CONFIGURATIONS_H264 as CFG
-#import CFG.CONFIGURATIONS_HEVC as CFG
-import CFG.CONFIGURATIONS_VP9  as CFG
+import CFG.CONFIGURATIONS_HEVC as CFG
+#import CFG.CONFIGURATIONS_VP9  as CFG
 #import CFG.CONFIGURATIONS_VVC  as CFG
+
+
+if CFG.__COMPATIBLE_WITH_VERSION__ != __THIS_VERSION__:
+	print("O arquivo de configuração não é compatível com este gerenciador. Por favor, acesse o repositório oficial e atualize os arquivos!")
 
 #Esse é o arquivo de vídeos
 import CFG.VIDEOS_SEQUENCES as VIDEOS
+#import CFG.VIDEOS_SEQUENCES_ALL as VIDEOS
 
 
 #####################
@@ -225,99 +139,116 @@ HOME_PATH = '/'.join(os.path.realpath(__file__).split('/')[:-1])
 class EXPERIMENT:
 	#cada experimento vai receber uma lista
 	def __init__(self, 
-	             idx = 0, 
-	             core = 0, 
-	             cq = 0, 
-	             resolution = VIDEOS.VIDEOS_LIST[0][0],
-	             video = VIDEOS.VIDEOS_LIST[0][1],
-	             width = VIDEOS.VIDEOS_LIST[0][2],
-	             height = VIDEOS.VIDEOS_LIST[0][3],
-	             subsample = VIDEOS.VIDEOS_LIST[0][4],
-	             bitdepth = VIDEOS.VIDEOS_LIST[0][5],
-	             num_frames = VIDEOS.VIDEOS_LIST[0][6],
-	             frames_per_unit = VIDEOS.VIDEOS_LIST[0][7],
-	             num_unit = VIDEOS.VIDEOS_LIST[0][8],
-	             codec_folder = '', 
-	             extra_param = '', 
-	             is_there_many_set_of_experiments = False):
-		#identificador único do experimento
-		self.index = idx
-		#número do núcleo em que o experimento irá ser executado
-		self.core = str(core)
-		#valor do CQ do experimento
-		self.cq = str(cq)
-		#nome do vídeo/pasta do experimento
-		self.video_name = video.replace(CFG.VIDEO_EXTENSION, '')
-		#caminho completo do vídeo
-		self.video_file = VIDEOS.VIDEOS_PATH[resolution] + video + CFG.VIDEO_EXTENSION
-		#identificador se o vídeo já foi enviado para processamento
-		self.executed = False
-		#identificador se o vídeo já finalizou seu processamento
-		self.finished = False
-		#identificador se há vários conjuntos de experimentos
-		self.many_experiments = is_there_many_set_of_experiments
-		#nome da pasta principal do codificador utilizado
-		self.codec_folder = codec_folder
-		#configuração extra que foi incluida
-		self.extra_param = extra_param
-		#altura do vídeo
-		self.height = height
-		#largura do vídeo
-		self.width = width
-		#produndidade de bits do vídeo
-		self.bitdepth = bitdepth
-		#subamostragem do vídeo
-		self.subsample = subsample
-		#numero de quadros exitentes no vídeo
-		self.num_frames = num_frames 
-		#numero de frames por unidade de tempo
-		self.frames_per_unit = frames_per_unit
-		#tamanho da unidade de tempo
-		self.num_unit = num_unit
+				 cq = '', 
+				 resolution = '',
+				 video = '',
+				 width = '',
+				 height = '',
+				 subsample = '',
+				 bitdepth = '',
+				 num_frames = '',
+				 frames_per_unit = '',
+				 num_unit = '',
+				 codec_folder = '', 
+				 extra_param = '', 
+				 is_there_many_set_of_experiments = False):
 		
-		#quando finalizar, eu já posso capturar os dados para cálculos de BD-rate
-		self.psnr_y = None
-		self.bitrate = None
-		self.time = None
-		
-		#Gero o caminho completo onde está o codificador
-		codec_path = '/'.join([HOME_PATH, codec_folder, 'bin/'])
-		codec_path = codec_path.replace('//', '/')
-		
-		#linha de comando que será aplicado ao experimento
-		#e também é obtido o arquivo de log após o fim do experimento
-		self.command, self.outputlog = CFG.GENERATE_COMMAND(self.core,
-		                                                    self.cq,
-		                                                    self.video_name,
-		                                                    self.video_file,
-		                                                    codec_path,
-		                                                    HOME_PATH,
-		                                                    self.codec_folder,
-		                                                    self.extra_param,
-		                                                    self.width,
-		                                                    self.height,
-		                                                    self.subsample,
-		                                                    self.bitdepth,
-		                                                    self.num_frames,
-		                                                    self.frames_per_unit,
-		                                                    self.num_unit)
-		#texto de identificação do processo no terminal
-		cmd = self.command.split(CFG.CODEC_NAME)[1]
-		cmd = cmd.split(CFG.VIDEO_EXTENSION)[0]
-		self.terminal_command = cmd
-		
-	#textinho para mostrar valores básicos do experimento
-	def printable(self):
-		if self.finished:
-			txt = "[X]"
+		if (cq == '' and
+			resolution == '' and
+			video == '' and
+			width == '' and
+			height == '' and
+			subsample == '' and
+			bitdepth == '' and
+			num_frames == '' and
+			frames_per_unit == '' and
+			num_unit == '' and
+			codec_folder == '' and
+			extra_param == '' and
+			is_there_many_set_of_experiments == False
+		):
+			self.cq = None
+			self.video_name = None
+			self.video_file = None
+			self.executed = False
+			self.finished = False
+			self.many_experiments = None
+			self.codec_folder = None
+			self.extra_param = None
+			self.height = None
+			self.width = None
+			self.bitdepth = None
+			self.subsample = None
+			self.num_frames = None
+			self.frames_per_unit = None
+			self.num_unit = None
+			self.psnr_y = None
+			self.bitrate = None
+			self.time = None
+			self.command = None
+			self.outputlog = None
+			self.terminal_command = None
 		else:
-			txt = "[ ]"
-		txt += "CORE=" + self.core + "\tCQ=" + self.cq + "\tVIDEO=" + self.video_name
 		
-		if self.many_experiments:
-			txt += "\tSET='" + self.extra_param + "'"
-		
-		printlog(txt)
+			#valor do CQ do experimento
+			self.cq = str(cq)
+			#nome do vídeo/pasta do experimento
+			self.video_name = video.replace(CFG.VIDEO_EXTENSION, '')
+			#caminho completo do vídeo
+			self.video_file = VIDEOS.VIDEOS_PATH[resolution] + video + CFG.VIDEO_EXTENSION
+			#identificador se há vários conjuntos de experimentos
+			self.many_experiments = is_there_many_set_of_experiments
+			#nome da pasta principal do codificador utilizado
+			self.codec_folder = codec_folder
+			#configuração extra que foi incluida
+			self.extra_param = extra_param
+			#altura do vídeo
+			self.height = height
+			#largura do vídeo
+			self.width = width
+			#produndidade de bits do vídeo
+			self.bitdepth = bitdepth
+			#subamostragem do vídeo
+			self.subsample = subsample
+			#numero de quadros exitentes no vídeo
+			self.num_frames = num_frames 
+			#numero de frames por unidade de tempo
+			self.frames_per_unit = frames_per_unit
+			#tamanho da unidade de tempo
+			self.num_unit = num_unit
+			
+			#quando finalizar, eu já posso capturar os dados para cálculos de BD-rate
+			self.psnr_y = None
+			self.bitrate = None
+			self.time = None
+			
+			#Gero o caminho completo onde está o codificador
+			codec_path = '/'.join([HOME_PATH, codec_folder, 'bin/'])
+			codec_path = codec_path.replace('//', '/')
+			
+			#linha de comando que será aplicado ao experimento
+			#e também é obtido o arquivo de log após o fim do experimento
+			self.command, self.outputlog = CFG.GENERATE_COMMAND(self.cq,
+																self.video_name,
+																self.video_file,
+																codec_path,
+																HOME_PATH,
+																self.codec_folder,
+																self.extra_param,
+																self.width,
+																self.height,
+																self.subsample,
+																self.bitdepth,
+																self.num_frames,
+																self.frames_per_unit,
+																self.num_unit)
+			#texto de identificação do processo no terminal
+			cmd = self.command.split(CFG.CODEC_NAME)[1]
+			cmd = cmd.split(CFG.VIDEO_EXTENSION)[0]
+			self.terminal_command = cmd
+	
+	def get_command_line(self):
+		return self.terminal_command
 		
 	#nos backup da vida, preciso reinterpretar os dados json
 	def update(self, data):
@@ -341,182 +272,87 @@ class EXPERIMENT:
 
 ####################################################################
 
-#classe que armazena todos os experimentos que serão executados
-class LIST_OF_EXPERIMENTS:
-	#inicio a classe com todos os experimentos possíveis
-	#SELEÇÃO FIXA DE NÚCLEOS
+#classe que armazena os núcleos que serão utilizados durante a execução deste script
+class CORE_CONTROL:
 	def __init__(self):
-		iterate_core = 0
-		idx = 0
-		#lista de experimentos
-		self.LIST = []
-		
-		#coleciono todas as configurações possíveis
-		extra_params = ['']
-		extra_params = [*extra_params, *CFG.EXTRA_PARAMS]
-		
-		#identifico se há mais de um conjunto de experimentos
-		more_than_one_set_of_experiments = len(extra_params) > 1
-		
-		#de cada vídeo e cada CQ e cada configuração extra, gero os experimentos
-		for resolution, video, width, height, subsample, bitdepth, num_frames, frames_per_unit, num_unit in VIDEOS.VIDEOS_LIST:
-			for cq in CFG.CQ_LIST:
-				for extra_p in extra_params:
-					for codec_path in CFG.CODEC_PATHS:
-						exp = EXPERIMENT(idx,
-								         CFG.ALLOWED_CORES[iterate_core], 
-									     cq,
-									     resolution,
-									     video,
-									     width,
-									     height,
-									     subsample,
-									     bitdepth,
-									     num_frames,
-									     frames_per_unit,
-									     num_unit,
-									     codec_path,
-									     extra_p,
-									     more_than_one_set_of_experiments)
-					
-						self.LIST.append(exp)
-						iterate_core += 1
-						idx += 1
-						if iterate_core >= CFG.MAX_CORES:
-							iterate_core = 0
-		#controlador de experimentos existentes
-		self.MAX_EXPERIMENTS = len(self.LIST)
-		#informa quantos experimentos já foram finalizados
-		self.TOTAL_FINALIZED = 0
+		self.core_queue = queue.Queue()
+		for i in range(len(CFG.ALLOWED_CORES)):
+			self.core_queue.put(CFG.ALLOWED_CORES[i])
+	
+	#verifica se há núcleos livres
+	def is_there_free_cores(self):
+		return not self.core_queue.empty()
+	
+	#captura o núcleo que está livre para uso
+	def get_core_idx(self):
+		if not self.core_queue.empty():
+			return self.core_queue.get()
+		return None
+
+	def free_core(self, idx):
+		self.core_queue.put(idx)
+
+####################################################################
+
+#Classe que armazena os experimentos que serão utilizados durante a execução deste script
+class EXPERIMENT_CONTROL:
+	def __init__(self):
+		self.experiment_queue = queue.Queue()
 		
 		if(self.load_backup()):
 			printlog("Dados do backup foram recuperados com sucesso!")
-	
-	#retorna um experimento de acordo com o seu índice
-	def get_experiment_by_idx(self, idx):
-		if(idx >= self.MAX_EXPERIMENTS):
-			printlog("FALHA F1: tentativa ilegal de acesso à lista de experimentos")
-			return None
-		return self.LIST[idx]
-	
-	#manda rodar um experimento com base em seu index
-	def execute_experiment_by_idx(self, idx):
-		if(idx >= self.MAX_EXPERIMENTS):
-			printlog("FALHA F2: tentativa ilegal de acesso à lista de experimentos")
-			return None
-		exp = self.LIST[idx]
-		
-		#caso for a primeira vez que o video vai ser codificado,
-		#criar nova pasta
-		if(not os.path.exists(exp.video_name)):
-			os.system('mkdir ' + exp.video_name)
-		#Para cada CQ que se vai usar, criar pasta, caso não existir
-		for cq in CFG.CQ_LIST:
-			if(not os.path.exists(exp.video_name + '/cq_' + str(cq))):
-				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq))
-				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/log')
-				os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/video')
-		
-		#executa o comando em modo terminal	
-		subprocess.call(exp.command, shell=True)
-		
-		exp.executed = True
-		
-	#quando um experimento finaliza, tirar ele da lista de "em execução"
-	#além disso, obtenho os valores dos arquivos e salvo eles em um csv
-	#no final, mostro tudo que já foi finalizado
-	def finishing_experiment(self, idx):
-		if(idx >= self.MAX_EXPERIMENTS):
-			printlog("FALHA F3: tentativa ilegal de acesso à lista de experimentos")
-			return None
-		exp = self.LIST[idx]
-		exp.finished = True
-		
-		#Adicionado um try para verificar se a busca ocorre como esperado.
-		#Em caso negativo, manter os valores nulos para as variáveis
-		#No futuro, corrigir esse procedimento
-		try:
-			exp.psnr_y, exp.bitrate, exp.time = CFG.get_psnr_bitrate_time(exp.outputlog)
-		except:
-			printlog("FALHA ao obter os dados do log para a simulação de indice " + str(idx) + ".")
-		exp.export()
-		self.TOTAL_FINALIZED += 1
-		self.save_backup()
-		self.print_list_of_experiment_finalized()
-	
-	#informa se ainda há experimentos a serem executados
-	def are_there_experiments_waiting(self):
-		if (self.TOTAL_FINALIZED == self.MAX_EXPERIMENTS):
-			return False
-		return True
-	
-	#retorna o próximo experimento a ser executado para o núcleo informado
-	def get_next_free_experiment_on_core(self, core):
-		for exp in self.LIST:
-			if (exp.finished):
-				continue
+		else:
+			#coleciono todas as configurações possíveis
+			extra_params = ['']
+			extra_params = [*extra_params, *CFG.EXTRA_PARAMS]
 			
-			if (exp.executed):
-				continue
-				
-			if(exp.core == str(core)):
-				return exp.index
-		
-		#Se não há mais nada, então retornar valor "inválido"
-		return -1
-	
-	#mostra todos os processos em execução no momento
-	def print_list_of_experiment_in_execution(self):
-		printlog("Simulações que estão sendo executadas:")
-		for exp in self.LIST:
-			if(exp.executed):
-				if(not exp.finished):
-					exp.printable()
-		printlog()
-					
-	#mostra todos os processos já finalizados
-	def print_list_of_experiment_finalized(self):
-		printlog("Lista de simulações finalizadas")
-		for exp in self.LIST:
-			if(exp.finished):
-				exp.printable()
-		printlog()
-
-	#mostra todos os processos aguardando execução
-	def print_list_of_experiment_waiting(self):
-		printlog("Lista de simulações aguardando na fila:")
-		for exp in self.LIST:
-			if(not exp.executed):
-				exp.printable()
-		printlog()
-	
-	#mostra todos os processos da lista
-	def print_list_of_experiment(self):
-		printlog("Lista completa de simulações")
-		for exp in self.LIST:
-			exp.printable()
-		printlog()
-	
-	#função específica para treinos
-	#elimina parte dos experimentos para deixar apenas
-	#a quantidade informada pelo parâmetro
-	def dropTo(self, untilNum):
-		self.LIST = self.LIST[:untilNum]
-		self.MAX_EXPERIMENTS = len(self.LIST)
-		
-	#função que exporta em linha de comando todos os experimentos
-	def export_commands(self):
-		for exp in self.LIST:
-			printlog(exp.command)
+			#identifico se há mais de um conjunto de experimentos
+			more_than_one_set_of_experiments = len(extra_params) > 1
 			
-	#exporta a classe inteira para um arquivo de backup
-	def save_backup(self):
-		#abre com 'w' pq quero sobreescrever o dado antigo
-		backup_file = open('backup.json', 'w')
-		jsoned = json.dumps(self, default=lambda o: o.__dict__)
-		backup_file.write(jsoned)
-		backup_file.close()
-		printlog("Arquivo de backup finalizado")
+			#de cada vídeo e cada CQ e cada configuração extra, gero os experimentos
+			for resolution, video, width, height, subsample, bitdepth, num_frames, frames_per_unit, num_unit in VIDEOS.VIDEOS_LIST:
+				for cq in CFG.CQ_LIST:
+					for extra_p in extra_params:
+						for codec_path in CFG.CODEC_PATHS:
+							exp = EXPERIMENT(cq,
+											 resolution,
+											 video,
+											 width,
+											 height,
+											 subsample,
+											 bitdepth,
+											 num_frames,
+											 frames_per_unit,
+											 num_unit,
+											 codec_path,
+											 extra_p,
+											 more_than_one_set_of_experiments)
+						
+							self.experiment_queue.put(exp)
+	
+	
+	#verifica se há experimentos a serem executados
+	def is_there_experiment_in_queue(self):
+		return not self.experiment_queue.empty()
+		
+	#captura o núcleo que está livre para uso
+	def get_experiment(self):
+		if not self.experiment_queue.empty():
+			return self.experiment_queue.get()
+		return None
+	
+	#retorna o tamanho da fila
+	def queue_size(self):
+		return self.experiment_queue.qsize()
+		
+	#remove elementos da fila enquanto este for maior que o valor informado
+	def drop_queue(self, number):
+		while self.experiment_queue() > number:
+			self.experiment_queue.get()
+			
+	#caso precisar devolver algum experimento para a fila de execução
+	def give_back(self, exp):
+		self.experiment_queue.put(exp)
 	
 	#carrega os dados salvos, caso houver algum arquivo de backup
 	#caso sucesso, retornar verdadeiro
@@ -525,31 +361,201 @@ class LIST_OF_EXPERIMENTS:
 			#Aqui eu uso 'r' pq só quero que haja leitura
 			backup_file = open('backup.json', 'r')
 			jsoned = json.load(backup_file)
-			self.__dict__.update(jsoned)
-			list_in_dict = self.LIST
-			self.LIST = []
-			for dct in list_in_dict:
+			
+			#Caso o backup esteja vazio, ignorar
+			if (len(jsoned) == 0):
+				backup_file.close()
+				return False
+			
+			#lê cada linha do backup e criar um novo experimento na fila de execução
+			elements_added = 0
+			for exp_dict in jsoned:
 				exp = EXPERIMENT()
-				exp.update(dct)
-				if(exp.executed):
-					#Nos casos de vídeos que iniciaram
-					#mas não finalizaram, deve-se
-					#recomeçar eles
-					if(not(exp.finished)):
-						exp.executed = False
-				self.LIST.append(exp)
+				exp.update(exp_dict)
+				self.experiment_queue.put(exp)
+				elements_added = elements_added + 1
+
 			backup_file.close()
 			printlog("Recarregamento dos dados efetuada com sucesso")
-			printlog("Os experimentos finalizados até o momento:")
-			self.print_list_of_experiment_finalized()
-			printlog()
+			printlog("Foram recuperados " + str(elements_added) + " experimentos")
 			return True
 		return False
 		
+####################################################################
+
+#Classe que gerenciará os experimentos para que sejam executadas nos núcleos corretos
+class FIFO_CONTROL:
+	def __init__(self):
+		#fila de experimentos
+		self.core_control = CORE_CONTROL()
+		self.exp_control = EXPERIMENT_CONTROL()
+		
+		self.MAX_EXPERIMENTS = self.exp_control.queue_size()
+		
+		#é preciso saber quem está executando
+		self.executing = []
+		
+	
+	#Faz uma busca pelos processos em execução e verifica se determinado experimento
+	#ainda está ou não sendo executado.
+	#recebe como entrada o parâmetro que foi submetido para execução e o número do core
+	def exists_command_being_executed_on_core(self, exp, core):
+		#no terminal eu digitaria:
+		#ps -eo psr,cpu,cmd | grep -E  "^[[:space:]]+[[:space:]]+CORE"
+		
+		#Aqui eu pego a lista de processos que estão no core X
+		regex = "^[[:space:]]+" + str(core)
+		p1 = subprocess.Popen(['ps', '-eo', 'psr,cpu,cmd'], stdout=subprocess.PIPE)
+		p2 = subprocess.Popen(['grep', '-E', r'{}'.format(regex)], stdin=p1.stdout, stdout=subprocess.PIPE)
+		p1.stdout.close()
+		
+		#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
+		lines = p2.communicate()[0].decode("utf-8")
+		
+		#Agora verifico se existe a linha de comando informada entre os processos buscados
+		if(exp.get_command_line() in lines):
+			return True
+		else:
+			return False
+	
+	#A função é bem similar ao de cima, só que eu olho para todos os núcleos
+	#atrás de alguma função que tenha o nome do codificador que estou utilizando.
+	#Essa função serve para manter esse script aguardando até o real fim de todas
+	#as simulações, de forma a possibilitar a geração dos BD-rates.
+	def is_there_any_experiment_in_execution(self):
+		#no terminal eu digitaria:
+		#ps -eo psr,cpu,cmd | grep CODEC"
+		
+		#Aqui eu pego a lista de processos que estão rodando
+		p1 = subprocess.Popen(['ps', '-eo', 'psr,cpu,cmd'], stdout=subprocess.PIPE)
+		p2 = subprocess.Popen(['grep', '-E', CFG.CODEC_NAME], stdin=p1.stdout, stdout=subprocess.PIPE)
+		p1.stdout.close()
+		
+		#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
+		lines = p2.communicate()[0].decode("utf-8")
+		
+		if len(lines) > 0:
+			#ainda tem coisa rodando
+			return True
+		return False
+	
+	#Faço uma busca por todos os processos em execução, a fim de encontrar aqueles que já finalizaram
+	def clean_executions(self):
+		for exp, core in self.executing:
+			if ( not self.exists_command_being_executed_on_core(exp, core) ):
+				self.finishing_experiment(exp, core)
+	
+	#manda rodar um experimento com base em seu index
+	def execute_experiment(self):
+		
+		#antes de iniciar, é bom dar uma limpa nos processos
+		self.clean_executions()
+		
+		#SE houver comando a ser executado e SE houver núcleo livre, então
+		if(self.core_control.is_there_free_cores()):
+			if(self.exp_control.is_there_experiment_in_queue()):
+				exp = self.exp_control.get_experiment()
+				core_idx = self.core_control.get_core_idx()
+				
+				#caso for a primeira vez que o video vai ser codificado,
+				#criar nova pasta
+				if(not os.path.exists(exp.video_name)):
+					os.system('mkdir ' + exp.video_name)
+				#Para cada CQ que se vai usar, criar pasta, caso não existir
+				for cq in CFG.CQ_LIST:
+					if(not os.path.exists(exp.video_name + '/cq_' + str(cq))):
+						os.system('mkdir ' + exp.video_name + '/cq_' + str(cq))
+						os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/log')
+						os.system('mkdir ' + exp.video_name + '/cq_' + str(cq) + '/video')
+				
+				full_command = 'taskset -c ' + str(core_idx) + ' ' + exp.command
+				
+				#executa o comando em modo terminal	
+				subprocess.call(full_command, shell=True)
+				
+				#armazena quem está executando
+				self.executing.append([exp, core_idx])
+			else: #não há mais experimentos
+				return False
+		return True
+					
+	#quando um experimento finaliza, tirar ele da lista de "em execução"
+	#além disso, obtenho os valores dos arquivos e salvo eles em um csv
+	def finishing_experiment(self, exp, core):
+		#removo da lista
+		self.executing.remove([exp, core])
+		
+		#libero o núcleo
+		self.core_control.free_core(core)
+		
+		#Adicionado um try para verificar se a busca ocorre como esperado.
+		#Em caso negativo, manter os valores nulos para as variáveis
+		#No futuro, corrigir esse procedimento
+		try:
+			exp.psnr_y, exp.bitrate, exp.time = CFG.get_psnr_bitrate_time(exp.outputlog)
+		except:
+			printlog("FALHA ao obter os dados do log para o arquivo " + exp.outputlog + ".")
+		
+		#exporta os dados finalizados para o arquivo CSV
+		exp.export()
+		
+		self.save_backup()
+		
+	#função específica para treinos
+	#elimina parte dos experimentos para deixar apenas
+	#a quantidade informada pelo parâmetro
+	def dropTo(self, untilNum):
+		self.exp_control.drop_queue(untilNum)
+		self.MAX_EXPERIMENTS = self.exp_control.queue_size()
+		
+	#função que exporta em linha de comando todos os experimentos
+	def export_commands(self):
+		max_exp = self.exp_control.queue_size()
+		for i in range(max_exp):
+			exp = self.exp_control.get_experiment()
+			printlog(exp.command)
+			self.exp_control.give_back(exp)
+			
+	#exporta a classe inteira para um arquivo de backup
+	def save_backup(self):
+		#antes de conseguir salvar, eu preciso obter os dados dos experimentos
+		#que ainda não foram finalizados. Eles estão OU em execução
+		#OU aguardando na fila. Portanto, preciso capturar eles
+
+		#Experimentos em execução
+		experiments_list = []
+		for experiment, core_idx in self.executing:
+			experiments_list.append(experiment)
+
+		#Experimentos na fila
+		#OBS: não consigo simplesmente pegar os experimentos da fila
+		#preciso esvaziar a fila e depois preencher ela novamente
+		copy_queue = queue.Queue()
+		while not self.exp_control.experiment_queue.empty():
+			exp = self.exp_control.experiment_queue.get()
+			copy_queue.put(exp)
+			experiments_list.append(exp)
+	
+		while not copy_queue.empty():
+			self.exp_control.experiment_queue.put(copy_queue.get())
+		
+		#abre com 'w' pq quero sobreescrever o dado antigo
+		backup_file = open('backup.json', 'w')
+		jsoned = json.dumps(experiments_list, default=lambda o: o.__dict__)
+		backup_file.write(jsoned)
+		backup_file.close()
+		print("Arquivo de backup finalizado")
+		
 	#Retorna o percentual de experimentos finalizados
 	def get_percentage_of_experiments_completed(self):
-		percentage = (self.TOTAL_FINALIZED / (self.MAX_EXPERIMENTS + 1) ) * 100
+		numerator = self.MAX_EXPERIMENTS - (self.exp_control.queue_size() + len(self.executing))
+		percentage = (numerator / (self.MAX_EXPERIMENTS + 1) ) * 100
 		return "{:.2f}".format(percentage)
+
+						
+
+####################################################################
+
 
 
 ####################
@@ -562,101 +568,110 @@ class LIST_OF_EXPERIMENTS:
 #Recebe quatro vetores, e calcula a curva entre eles.
 #Quando colocamos o piecewise=1, os valores de BD-rate retornam com maior confiança!
 def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
-    lR1 = np.log(R1)
-    lR2 = np.log(R2)
+	lR1 = np.log(R1)
+	lR2 = np.log(R2)
 
-    # rate method
-    p1 = np.polyfit(PSNR1, lR1, 3)
-    p2 = np.polyfit(PSNR2, lR2, 3)
+	# rate method
+	p1 = np.polyfit(PSNR1, lR1, 3)
+	p2 = np.polyfit(PSNR2, lR2, 3)
 
-    # integration interval
-    min_int = max(min(PSNR1), min(PSNR2))
-    max_int = min(max(PSNR1), max(PSNR2))
+	# integration interval
+	min_int = max(min(PSNR1), min(PSNR2))
+	max_int = min(max(PSNR1), max(PSNR2))
 
-    # find integral
-    if piecewise == 0:
-        p_int1 = np.polyint(p1)
-        p_int2 = np.polyint(p2)
+	# find integral
+	if piecewise == 0:
+		p_int1 = np.polyint(p1)
+		p_int2 = np.polyint(p2)
 
-        int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
-        int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
-    else:
-        lin = np.linspace(min_int, max_int, num=100, retstep=True)
-        interval = lin[1]
-        samples = lin[0]
-        v1 = scipy.interpolate.pchip_interpolate(np.sort(PSNR1), lR1[np.argsort(PSNR1)], samples)
-        v2 = scipy.interpolate.pchip_interpolate(np.sort(PSNR2), lR2[np.argsort(PSNR2)], samples)
-        # Calculate the integral using the trapezoid method on the samples.
-        int1 = np.trapz(v1, dx=interval)
-        int2 = np.trapz(v2, dx=interval)
-
-    # find avg diff
-    avg_exp_diff = (int2-int1)/(max_int-min_int)
-    avg_diff = (np.exp(avg_exp_diff)-1)*100
-    return avg_diff
-
-
-
-#Faz uma busca pelos processos em execução e verifica se determinado experimento
-#ainda está ou não sendo executado.
-#recebe como entrada o parâmetro que foi submetido para execução e o número do core
-def exists_command_being_executed_on_core(cmd, core):
-	#no terminal eu digitaria:
-	#ps -eo psr,cpu,cmd | grep -E  "^[[:space:]]+[[:space:]]+CORE"
-	
-	#Aqui eu pego a lista de processos que estão no core X
-	regex = "^[[:space:]]+" + str(core)
-	p1 = subprocess.Popen(['ps', '-eo', 'psr,cpu,cmd'], stdout=subprocess.PIPE)
-	p2 = subprocess.Popen(['grep', '-E', r'{}'.format(regex)], stdin=p1.stdout, stdout=subprocess.PIPE)
-	p1.stdout.close()
-	
-	#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
-	lines = p2.communicate()[0].decode("utf-8")
-	
-	#Agora verifico se existe a linha de comando informada entre os processos buscados
-	if(cmd in lines):
-		return True
+		int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
+		int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
 	else:
-		return False
+		lin = np.linspace(min_int, max_int, num=100, retstep=True)
+		interval = lin[1]
+		samples = lin[0]
+		v1 = scipy.interpolate.pchip_interpolate(np.sort(PSNR1), lR1[np.argsort(PSNR1)], samples)
+		v2 = scipy.interpolate.pchip_interpolate(np.sort(PSNR2), lR2[np.argsort(PSNR2)], samples)
+		# Calculate the integral using the trapezoid method on the samples.
+		int1 = np.trapz(v1, dx=interval)
+		int2 = np.trapz(v2, dx=interval)
 
-#A função é bem similar ao de cima, só que eu olho para todos os núcleos
-#atrás de alguma função que tenha o nome do codificador que estou utilizando.
-#Essa função serve para manter esse script aguardando até o real fim de todas
-#as simulações, de forma a possibilitar a geração dos BD-rates.
-def is_there_any_codec_in_execution():
-	#no terminal eu digitaria:
-	#ps -eo psr,cpu,cmd | grep CODEC"
-	
-	#Aqui eu pego a lista de processos que estão rodando
-	p1 = subprocess.Popen(['ps', '-eo', 'psr,cpu,cmd'], stdout=subprocess.PIPE)
-	p2 = subprocess.Popen(['grep', '-E', CFG.CODEC_NAME], stdin=p1.stdout, stdout=subprocess.PIPE)
-	p1.stdout.close()
-	
-	#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
-	lines = p2.communicate()[0].decode("utf-8")
-	
-	if len(lines) > 0:
-		#ainda tem coisa rodando
-		return True
-	return False
-	
+	# find avg diff
+	avg_exp_diff = (int2-int1)/(max_int-min_int)
+	avg_diff = (np.exp(avg_exp_diff)-1)*100
+	return avg_diff
 
-#Função que grava em um csv os dados de BD-rate e tempo calculados
-def export_to_csv(video_folder, cfg_set, bdrate, time):
-	filename = video_folder + '/summary_of_BD-rate_Time.csv'
-	csv = open(filename, 'a')
-	if os.path.getsize(filename) == 0:
-		csv.write("configuration, bdrate, time cfg / time anchor\n")
-	csv.write(cfg_set + "," + str(bdrate) + "," + str(time) + "\n")
-	csv.close()
+
+#Função que recebe uma pasta, calcula as métricas de transcodificação e grava um novo arquivo csv nessa pasta
+def coding_metrics_of(path_file):
+	
+	if(not os.path.exists(path_file + '/summary_of_all_data.csv')):
+		printlog("Não existe o CSV com os dados da codificação na pasta '" + path_file + "' para geração das métricas de codificação.")
+		return None
+	
+	csv = pd.read_csv(path_file + '/summary_of_all_data.csv')
+	df = pd.DataFrame(csv)
+	df.sort_values(by=['set', ' cq'], inplace=True)
+
+	if df.isnull().values.any():
+		print("Nao é possível obter as métricas da pasta " + path_file)
+		return
+  
+	original_set = CFG.CODEC_PATHS[0] + ' under anchor'
+
+	df_list = []
+
+	for key in df['set'].unique():
+		if key == original_set:
+			original = df[df['set'] == key].copy()
+		else:
+			df_copy = df[df['set'] == key].copy()
+			df_list.append(df_copy)
+
+	R1 = original[' bitrate'].values.tolist()
+	P1 = original[' psnr_y'].values.tolist()
+	T1 = original[' time'].values.tolist()
+
+	metricas_list = []
+
+	for df_case in df_list:
+		try:
+			R2 = df_case[' bitrate'].values.tolist()
+			P2 = df_case[' psnr_y'].values.tolist()
+			T2 = df_case[' time'].values.tolist()
+
+			bdrate = BD_RATE(R1, P1, R2, P2)
+			set_name = df_case['set'].unique()[0]
+			time_compare = sum(T2) / sum(T1)
+
+			metricas_list.append([set_name, bdrate, time_compare])
+			
+			if CFG.PLOT:
+				plot_bdrate_curve(P1,
+								  R1, 
+								  P2, 
+								  R2,
+								  path_file,
+								  set_name,
+								  bdrate)
+			
+		except:
+			printlog("Falha ao calcular as métricas de codificação na pasta '" + path + "'")
+			return None
+
+	df_metricas = pd.DataFrame(metricas_list, columns=['configuration name', 'bd-rate', 'time versus/time anchor'])
+
+	df_metricas_file = path_file + '/coding_metrics.csv'
+	df_metricas.to_csv(df_metricas_file, encoding='utf-8', index=False)
+
 
 
 #Função que lê os dados de psnr e bitrate para gerar um gráfico com a curva bd-rate
 #entradas:
-#     p_1, psnr âncora (dados do arquivo out.log)
-#     b_1, bitrate âncora (dados do arquivo out.log)
-#     p_2, psnr experimento (dados do arquivo out_set_EXPERIMENTO.log)
-#     p_2, bitrate experimento (dados do arquivo out_set_EXPERIMENTO.log)
+#	 p_1, psnr âncora (dados do arquivo out.log)
+#	 b_1, bitrate âncora (dados do arquivo out.log)
+#	 p_2, psnr experimento (dados do arquivo out_set_EXPERIMENTO.log)
+#	 p_2, bitrate experimento (dados do arquivo out_set_EXPERIMENTO.log)
 def plot_bdrate_curve(p_1, b_1, p_2, b_2, video_folder, experiment_text, bdrate):
 	#vou transformar os quatro vetores em dois DataFrames, 
 	#só pra aproveitar um código que já tenho
@@ -678,36 +693,36 @@ def plot_bdrate_curve(p_1, b_1, p_2, b_2, video_folder, experiment_text, bdrate)
 	
 	#Mando plotar as linhas
 	ax = sns.lineplot(data=anchor, 
-	                  x='bitrate', 
-	                  y='psnr_y', 
-	                  linewidth=2.5, 
-	                  marker='o', 
-	                  markersize=14)
+					  x='bitrate', 
+					  y='psnr_y', 
+					  linewidth=2.5, 
+					  marker='o', 
+					  markersize=14)
 	ax = sns.lineplot(data=versus, 
-	                  x='bitrate', 
-	                  y='psnr_y', 
-	                  linewidth=2.5, 
-	                  marker='s', 
-	                  markersize=14, 
-	                  ax=ax)
+					  x='bitrate', 
+					  y='psnr_y', 
+					  linewidth=2.5, 
+					  marker='s', 
+					  markersize=14, 
+					  ax=ax)
 	
 	#digo o texto dos eixos
 	ax.set(xlabel="bitrate (bps)", 
-	       ylabel = "PSNR-Y (dB)")
+		   ylabel = "PSNR-Y (dB)")
 	
 	#adiciono a legenda da imagem
 	ax.legend(labels=['anchor configuration', 
-	                  experiment_text + ' configuration'], 
-	          loc='lower right')
+					  experiment_text + ' configuration'], 
+			  loc='lower right')
 	
 	#adicionando o valor do BD-rate no gráfico
 	#CASO não quiser, só comentar a linha de baixo
 	#posição: x = o menor bitrate; y = maior psnr
 	ax.text(b_1[-1], 
-	        p_1[0], 
-	        "BD-rate {:.3f}%".format(bdrate), 
-	        fontsize=20, 
-	        verticalalignment='top')
+			p_1[0], 
+			"BD-rate {:.3f}%".format(bdrate), 
+			fontsize=20, 
+			verticalalignment='top')
 	
 	#mando mostrar a grade
 	plt.grid(True)
@@ -733,11 +748,15 @@ def printlog(text = "", end = "\n"):
 ## __MAIN__() ##
 ################
 
+printlog("Script Gerenciador de Experimentos de Codificação.")
+printlog("\t\tversão " + str(__THIS_VERSION__))
+printlog()
+
+#Variável de controle do tempo
+__WAITING_TIME__ = 10
 
 #########################################################
-##                   baixa o libaom                    ##
-## Se for utilizar OUTRO codificador que não o libaom, ##
-## então modificar o código para baixe corretamente.   ##
+##				 baixa o software					##
 #########################################################
 
 if CFG.DOWNLOAD:
@@ -754,9 +773,7 @@ if CFG.DOWNLOAD:
 	
 
 #############################################################
-##                    Compila o libaom                     ##
-## Se precisar adicionar algo extra ou for utilizar OUTRO  ##
-## codificador que não o libaom, então modificar o código. ##
+##				  Compila o software					 ##
 #############################################################
 
 if CFG.COMPILE:
@@ -778,236 +795,89 @@ if CFG.COMPILE:
 
 
 ###############################################################
-##                     Executa um Teste                      ##
+##					 Executa um Teste					  ##
 ## O código abaixo gera todas as simulações e manda executar ##
-## somente a primeira simulação dentre todas.                ##
+## somente a primeira simulação dentre todas.				##
 ###############################################################
 
+
 if CFG.TESTE:
-	#crio a lista de experimentos
-	list_of_experiments = LIST_OF_EXPERIMENTS()
+	#crio o controlador de execução
+	fifo_control = FIFO_CONTROL()
 	
 	#mostro quantas simulações são possíveis de serem realizadas
 	printlog("Com a configuração estabelecida, há um total de " + 
-	      str(list_of_experiments.MAX_EXPERIMENTS) + 
-	      " simulações que podem ser realizadas.")
-	      
-	printlog("Iniciando a simulação 1")
-	#Dado o primeiro core, pego o experimento livre alocado para ele
-	idx = list_of_experiments.get_next_free_experiment_on_core(CFG.ALLOWED_CORES[0])
-	#capturo o experimento em uma variável, fica mais fácil de controlar
-	exp = list_of_experiments.get_experiment_by_idx(idx)
-	#Mostro qual é o experimento que vai ser executado
-	exp.printable()
-	#mando executar o experimento
-	list_of_experiments.execute_experiment_by_idx(idx)
-	while (is_there_any_codec_in_execution()):
-		printlog("\nEsperando Simulações em Andamento\n")
-		sleep(CFG.WAITING_TIME)
-	#quando ele terminar, finalizo ele
-	list_of_experiments.finishing_experiment(idx)
+			  str(fifo_control.MAX_EXPERIMENTS) + 
+			  " simulações que podem ser realizadas.")
 	
-	printlog("Simulação 1 finalizada.")
-	#Mostrando na mão os dados do arquivo de saída
-	exp = list_of_experiments.get_experiment_by_idx(idx)
+	fifo_control.execute_experiment()
+	
+	copy_of_exp = fifo_control.executing[0][0]
+	copy_of_core = fifo_control.executing[0][1]
+	
+	printlog("A linha de comando que está sendo executada no CORE " + 
+			 str(copy_of_core) +
+			 " é: \n" +
+			 copy_of_exp.command)
+	
+	while (fifo_control.is_there_any_experiment_in_execution()):
+		printlog("\nEsperando Simulações em Andamento\n")
+		sleep(__WAITING_TIME__)
+	
+	#é preciso se certificar que os núcleos estão limpos para possibilitar a geração das métricas
+	fifo_control.finishing_experiment(copy_of_exp, copy_of_core)
 	
 	printlog("A simulação apresentou os seguintes dados:")
-	printlog("PSNR-Y:" + str(exp.psnr_y) + "dB")
-	printlog("bitrate:" + str(exp.bitrate) + "bps")
-	printlog("tempo de execução:" + str(exp.time) + "ms")
-	
+	printlog("PSNR-Y:" + str(copy_of_exp.psnr_y) + "dB")
+	printlog("bitrate:" + str(copy_of_exp.bitrate) + "bps")
+	printlog("tempo de execução:" + str(copy_of_exp.time) + "ms")
 	
 
+
 ####################################################################
-##                 Executa Todas as Simulações                    ##
+##				 Executa Todas as Simulações					##
 ## Aqui há a geração das simulações e gerenciamento das execuções ##
 ####################################################################
 
 if CFG.EXECUTE:
-	#crio a lista de experimentos em si
-	list_of_experiments = LIST_OF_EXPERIMENTS()
-	list_of_experiments.save_backup()
+	#crio o controlador de execução
+	fifo_control = FIFO_CONTROL()
+
+	#mostro quantas simulações são possíveis de serem realizadas
+	printlog("Com a configuração estabelecida, há um total de " + 
+			  str(fifo_control.MAX_EXPERIMENTS) + 
+			  " simulações que podem ser realizadas.")
+
+
+	#Executa todos os experimentos
+	while ( fifo_control.execute_experiment() ):
+		printlog("Aguarde. Já foram concluídos " + fifo_control.get_percentage_of_experiments_completed() + "% do experimento")
+		sleep(__WAITING_TIME__)
+
+	#Quando não houver mais nenhum na fila, só aguardar o fim
+	while (fifo_control.is_there_any_experiment_in_execution()):
+		printlog("Aguarde. Já foram concluídos " + fifo_control.get_percentage_of_experiments_completed() + "% do experimento")
+		sleep(__WAITING_TIME__)
 	
-	################
-	# Em casos de testes locais, reduzo o número de experimentos
-	#list_of_experiments.dropTo(CFG.MAX_CORES)
-	################
-	
-	if(list_of_experiments.MAX_EXPERIMENTS <= CFG.MAX_CORES):
-		#neste caso, posso rodar todos sem nenhum problema
-		for core in CFG.ALLOWED_CORES:
-			idx = list_of_experiments.get_next_free_experiment_on_core(core)
-			list_of_experiments.get_experiment_by_idx(idx).printable()
-			list_of_experiments.execute_experiment_by_idx(idx)
-	else:
-		#crio a lista de índices de experimentos com dados vazios
-		list_index = [None] * CFG.MAX_CORES
-		
-		#enquanto houver experimentos pra executar, repita
-		while(list_of_experiments.are_there_experiments_waiting()):
-			#vai dar uma passada em todos os indices da lista
-			for idxList in range(CFG.MAX_CORES):
-				#caso o idx estiver nulo, significa que não foi inicializado
-				if(list_index[idxList] == None):
-					#busco o experimento
-					list_index[idxList] = list_of_experiments.get_next_free_experiment_on_core(CFG.ALLOWED_CORES[idxList])
-					#e já mando executar ele
-					list_of_experiments.get_experiment_by_idx(list_index[idxList]).printable()
-					list_of_experiments.execute_experiment_by_idx(list_index[idxList])
-					
-				
-				#caso o idx estiver negativo, é pq não tem mais experimentos para aquele núcleo
-				if(list_index[idxList] < 0):
-					continue
-				
-				#verifico se o experimento ainda está rodando
-				if(exists_command_being_executed_on_core(
-				                     list_of_experiments.get_experiment_by_idx(list_index[idxList]).terminal_command,
-				                     CFG.ALLOWED_CORES[idxList])):
-					
-					printlog("Núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " ocupado, aguarde...")
-					continue
-				else:
-					printlog("Núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " liberado, aguarde...")
-					#já terminou, então preciso finalizar o experimento
-					list_of_experiments.finishing_experiment(list_index[idxList])
-					#procuro um novo experimento para rodar
-					list_index[idxList] = list_of_experiments.get_next_free_experiment_on_core(CFG.ALLOWED_CORES[idxList])
-					#Caso o valor for negativo, já acabaram os experimentos para aquele núcleo
-					if(list_index[idxList] < 0):
-						printlog("Experimentos do núcleo " + str(CFG.ALLOWED_CORES[idxList]) + " já finalizaram")
-						continue
-					else:
-						#mando executar
-						list_of_experiments.get_experiment_by_idx(list_index[idxList]).printable()
-						list_of_experiments.execute_experiment_by_idx(list_index[idxList])
-			
-			printlog("\nEsperando Simulações em Andamento\n")
-			#Vou forçar isso aparecer no terminal, sempre
-			print(list_of_experiments.get_percentage_of_experiments_completed() + "% concluido\n")
-			sleep(CFG.WAITING_TIME)
-	
-	#todas as simulações estão rodando, mas...
-	#é preciso esperar que eles de fato terminem!
-	while (is_there_any_codec_in_execution()):
-		printlog("\nEsperando Simulações em Andamento\n")
-		sleep(CFG.WAITING_TIME)
-	
+	#Para limpar de vez o arquivo de backup
+	fifo_control.clean_executions()
+	fifo_control.clean_executions()
+	printlog("Aguarde. Já foram concluídos " + fifo_control.get_percentage_of_experiments_completed() + "% do experimento")
+
 	printlog("\n\nFim das Simulações\n")
 	
-	#Agora posso pegar todos os dados e fazer os BD-rates, se houver:
-	# 1) ao menos UM parâmetro extra OU ao menos duas versões do codificador, pois preciso comparar duas configurações
-	# 2) ao menos QUATRO CQs, pois a curva de BD-rate requer isso!
-	if ( ((len(CFG.EXTRA_PARAMS) > 0) or (len(CFG.CODEC_PATHS) > 1)) and (len(CFG.CQ_LIST) > 3) ) :
-		printlog("Ativando sistema de geração automática de BD-rate")
-		
-		#lista de todos os conjuntos de simulação
-		extra_params = ['']
-		extra_params = [*extra_params, *CFG.EXTRA_PARAMS]
-		
-		#Ainda é preciso otimizar esses loops. Ainda está muito força-bruta
-		
-		#vou utilizar uma matriz quadridimensional para capturar os valores dos experimentos
-		#a ideia geral: matrix[codec][video][extra_param][cq].append([psnr, bitrate, time])
-		M3D = [None] * len(CFG.CODEC_PATHS)
-		for v in range(len(CFG.CODEC_PATHS)):
-			M3D[v] = [None] * len(VIDEOS.VIDEOS_LIST)
-			video_keys = []
-			for i in range(len(VIDEOS.VIDEOS_LIST)):
-				#A lista de vídeos é um array duplo, só me interessa um dos valores
-				video_keys.append(VIDEOS.VIDEOS_LIST[i][1])
-				M3D[v][i] = [None] * len(extra_params)
-				for j in range(len(extra_params)):
-					M3D[v][i][j] = [None] * len(CFG.CQ_LIST)
-		
-		printlog("Capturando valores dos arquivos...", end="\t")
-		#para cada simulação...
-		for idx in range(0, list_of_experiments.MAX_EXPERIMENTS):
-			exp = list_of_experiments.get_experiment_by_idx(idx)
-			
-			idxCodec = CFG.CODEC_PATHS.index(exp.codec_folder)
-			idxVideo = video_keys.index(exp.video_name)
-			idxParam = extra_params.index(exp.extra_param)
-			idxCQ    = CFG.CQ_LIST.index(int(exp.cq))
-			
-			M3D[idxCodec][idxVideo][idxParam][idxCQ] = [exp.psnr_y, exp.bitrate, exp.time]
-					
-		printlog("Finalizado!")	
-		printlog("Gerando percentuais...", end="\t")
-		
-		#bdrate = BD_RATE([])
-		BDRATE = []
-		
-		#de cada vídeo...
-		for vid in video_keys:
-			idxVideo = video_keys.index(vid)
-			
-			#pego os valores da configuração âncora
-			anchor_psnr = []
-			anchor_bitrate = []
-			anchor_time = []
-			
-			#Capturo os valores âncoras
-			for cq in range(len(CFG.CQ_LIST)):
-				#de cada vídeo, pego o primeiro parâmetro e todos os CQs
-				out = M3D[0][idxVideo][0][cq]
-				anchor_psnr.append(out[0])
-				anchor_bitrate.append(out[1])
-				anchor_time.append(out[2])
-			
-			#para cada codificador principal utilizado...
-			for idxCodec in range(len(CFG.CODEC_PATHS)):
-				
-				#Para cada parâmetro extra, capturo os valores e processo:
-				#a. O percentual de BD-rate
-				#b. o gráfico da curva de BD-rate
-				#c. O percentual de tempo de execução
-				for param in range(len(extra_params)):
-				
-					if (idxCodec == 0 and param == ''):
-						#então é a configuração âncora, que já foi obtida
-						continue
-				
-					versus_psnr = []
-					versus_bitrate = []
-					versus_time = []
-					for cq in range(len(CFG.CQ_LIST)):
-						#de cada vídeo, pego o primeiro parâmetro e todos os CQs
-						tmp = M3D[idxCodec][idxVideo][param][cq]
-						versus_psnr.append(tmp[0])
-						versus_bitrate.append(tmp[1])
-						versus_time.append(tmp[2])
-					
-					bdrate = BD_RATE(anchor_bitrate, 
-							         anchor_psnr, 
-							         versus_bitrate, 
-							         versus_psnr, 
-							         1)
-							         
-					timecomparison = sum(versus_time) / sum(anchor_time)
-					
-					if(extra_params[param] == ''):
-						text_to_show = CFG.CODEC_PATHS[idxCodec] + ' under anchor'
-					else:
-						text_to_show = CFG.CODEC_PATHS[idxCodec] + ' under ' + extra_params[param]
-						
-					
-					plot_bdrate_curve(anchor_psnr,
-							          anchor_bitrate, 
-							          versus_psnr, 
-							          versus_bitrate,
-							          vid,
-							          text_to_show,
-							          bdrate)
-					
-					export_to_csv(vid,
-							      text_to_show,
-							      bdrate,
-							      timecomparison)
-				
-			
-		printlog("Finalizado!")
-		
-	printlog("Script Gerenciador finalizado com sucesso!")
 	
+####################################################################
+##				 Executa Todas as Simulações					##
+## Aqui há a geração das simulações e gerenciamento das execuções ##
+####################################################################
+
+if CFG.METRICS:	
+	for resolution, video, width, height, subsample, bitdepth, num_frames, frames_per_unit, num_unit in VIDEOS.VIDEOS_LIST:
+		path = HOME_PATH + '/' + video
+		coding_metrics_of(path)
+		
+	printlog("Geração das Métricas Finalizado!")
+		
+printlog("Script Gerenciador finalizado com sucesso!")
 printlog("\n\nscript desevolvido por amborges@inf.ufpel.edu.br\n")
