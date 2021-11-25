@@ -395,6 +395,33 @@ class FIFO_CONTROL:
 		#é preciso saber quem está executando
 		self.executing = []
 		
+	#Faz uma busca pelos núcleos e verifica se ele está livre ou não
+	#recebe como entrada o número do core que se está observando
+	def is_core_free(self, core):
+		#no terminal eu digitaria
+		#top -1 -b -n 1
+		top = subprocess.Popen(['top', '-1', '-b', '-n 1'], stdout=subprocess.PIPE)
+		#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
+		lines = top.communicate()[0].decode("utf-8")
+		lines = lines.split('\n')
+		top.stdout.close()
+		
+		cpu_core = '%Cpu' + str(core)
+		
+		is_free = True
+		
+		for line in lines:
+			if (cpu_core in line):
+				#Devo ter algo assim
+				#%Cpu0  :100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+				#O meu interesse é no primeiro número, preciso ver se ele está acima de 50%
+				cpu_usage = float(line.split(':')[1].split('us')[0])
+				if cpu_usage > 50.0:
+					is_free =  False
+			break
+		
+		return is_free
+	
 	
 	#Faz uma busca pelos processos em execução e verifica se determinado experimento
 	#ainda está ou não sendo executado.
@@ -442,7 +469,8 @@ class FIFO_CONTROL:
 	#Faço uma busca por todos os processos em execução, a fim de encontrar aqueles que já finalizaram
 	def clean_executions(self):
 		for exp, core in self.executing:
-			if ( not self.exists_command_being_executed_on_core(exp, core) ):
+			#if ( not self.exists_command_being_executed_on_core(exp, core) ):
+			if self.is_core_free(core):
 				self.finishing_experiment(exp, core)
 	
 	#manda rodar um experimento com base em seu index
@@ -544,7 +572,7 @@ class FIFO_CONTROL:
 		jsoned = json.dumps(experiments_list, default=lambda o: o.__dict__)
 		backup_file.write(jsoned)
 		backup_file.close()
-		print("Arquivo de backup finalizado")
+		printlog("Arquivo de backup finalizado")
 		
 	#Retorna o percentual de experimentos finalizados
 	def get_percentage_of_experiments_completed(self):
