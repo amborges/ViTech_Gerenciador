@@ -408,7 +408,7 @@ class FIFO_CONTROL:
 		
 		cpu_core = '%Cpu' + str(core)
 		
-		is_free = True
+		is_free = False
 		
 		for line in lines:
 			if (cpu_core in line):
@@ -416,9 +416,9 @@ class FIFO_CONTROL:
 				#%Cpu0  :100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
 				#O meu interesse é no primeiro número, preciso ver se ele está acima de 50%
 				cpu_usage = float(line.split(':')[1].split('us')[0])
-				if cpu_usage > 50.0:
-					is_free =  False
-			break
+				if cpu_usage < 50.0:
+					is_free =  True
+					break
 		
 		return is_free
 	
