@@ -184,13 +184,19 @@ def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, ext
 	verb_param = ' --verbose --psnr'
 	
 	#Condições especiais de configuração
-	#Caso vídeo for 10bit de profundidade
-	if (bitdepth == 10):
-		main_cfg_param += ' --profile=2 --bit-depth=' + str(bitdepth)
-	
-	#Caso vídeo tiver subamostragem 444
-	if (subsample == 444):
-		main_cfg_param += ' --profile=1 --i' + str(subsample)
+	#Caso vídeo tiver subamostragem 420
+	if (subsample == 420):
+		#Caso vídeo for 8bit de profundidade
+		if (bitdepth == 8):
+			main_cfg_param += ' --profile=0 --i420 --bit-depth=8'
+		else:
+			main_cfg_param += ' --profile=1 --i420 --bit-depth=' + str(bitdepth)
+	else:
+		#Caso vídeo for 8bit de profundidade
+		if (bitdepth == 8):
+			main_cfg_param += ' --profile=2 --i' + str(subsample) + ' --bit-depth=8'
+		else:
+			main_cfg_param += ' --profile=3 --i' + str(subsample) + ' --bit-depth=' + str(bitdepth)
 	
 	#definindo as informações do vídeo
 	video_param  = ' --width=' + str(width) #width
