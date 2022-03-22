@@ -102,8 +102,8 @@ except:
 #import CFG.CONFIGURATIONS_AV1  as CFG
 #import CFG.CONFIGURATIONS_AVS3  as CFG
 #import CFG.CONFIGURATIONS_EVC  as CFG
-#import CFG.CONFIGURATIONS_H264 as CFG
-import CFG.CONFIGURATIONS_HEVC as CFG
+import CFG.CONFIGURATIONS_H264 as CFG
+#import CFG.CONFIGURATIONS_HEVC as CFG
 #import CFG.CONFIGURATIONS_VP9  as CFG
 #import CFG.CONFIGURATIONS_VVC  as CFG
 
@@ -394,34 +394,6 @@ class FIFO_CONTROL:
 		
 		#é preciso saber quem está executando
 		self.executing = []
-		
-	#Faz uma busca pelos núcleos e verifica se ele está livre ou não
-	#recebe como entrada o número do core que se está observando
-	def is_core_free(self, core):
-		#no terminal eu digitaria
-		#top -1 -b -n 1
-		top = subprocess.Popen(['top', '-1', '-b', '-n 1'], stdout=subprocess.PIPE)
-		#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
-		lines = top.communicate()[0].decode("utf-8")
-		lines = lines.split('\n')
-		top.stdout.close()
-		
-		cpu_core = '%Cpu' + str(core)
-		
-		is_free = False
-		
-		for line in lines:
-			if (cpu_core in line):
-				#Devo ter algo assim
-				#%Cpu0  :100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-				#O meu interesse é no primeiro número, preciso ver se ele está acima de 50%
-				cpu_usage = float(line.split(':')[1].split('us')[0])
-				if cpu_usage < 50.0:
-					is_free =  True
-					break
-		
-		return is_free
-	
 	
 	#Faz uma busca pelos processos em execução e verifica se determinado experimento
 	#ainda está ou não sendo executado.
@@ -437,13 +409,40 @@ class FIFO_CONTROL:
 		p1.stdout.close()
 		
 		#aqui estarão a lista de todos os processos que estão rodando no núcleo pesquisado
-		lines = p2.communicate()[0].decode("utf-8")
+		all_lines = p2.communicate()[0].decode("utf-8")
 		
-		#Agora verifico se existe a linha de comando informada entre os processos buscados
-		if(exp.get_command_line() in lines):
-			return True
-		else:
-			return False
+		#PROBLEMA
+		#a variável 'all_lines' agrupa os núcleos de 1 digito com os de 2 digitos (1 e 10 ou 2 e 25, pore exemplo). A ideia é ter que separar esses grupos
+		#cada par core-command está separada por '\n'. E os pares core-command estão separados por espaços e um traço.
+		
+		string_to_separe_core_and_command = '   - '
+		
+		lines = all_lines.split('\n')
+		process_in_core = []
+		
+		does_exist = False
+		
+		#para cada processo capturado
+		for line in lines:
+			#splito a informação
+			_data = line.split(string_to_separe_core_and_command)
+			if(len(_data) == 2):
+				#Só considero aqueles casos que houver duas informações
+				_core, _cmd = int(_data[0]), _data[1]
+				
+				#Caso o core for realmente o de interesse, anexar a lista
+				if (_core == core):
+					process_in_core.append(_cmd)
+		
+		#Para cada processo que realmente está executando no core observado
+		for process in process_in_core:
+			#Agora verifico se existe a linha de comando informada
+			if(exp.get_command_line() in process):
+				#se existir, modifica o valor da variável de retorno
+				does_exist = True
+				break #encerra o laço, pois não precisa seguir buscando
+		
+		return does_exist
 	
 	#A função é bem similar ao de cima, só que eu olho para todos os núcleos
 	#atrás de alguma função que tenha o nome do codificador que estou utilizando.
@@ -469,8 +468,7 @@ class FIFO_CONTROL:
 	#Faço uma busca por todos os processos em execução, a fim de encontrar aqueles que já finalizaram
 	def clean_executions(self):
 		for exp, core in self.executing:
-			#if ( not self.exists_command_being_executed_on_core(exp, core) ):
-			if self.is_core_free(core):
+			if ( not self.exists_command_being_executed_on_core(exp, core) ):
 				self.finishing_experiment(exp, core)
 	
 	#manda rodar um experimento com base em seu index
