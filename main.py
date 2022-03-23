@@ -245,7 +245,8 @@ class EXPERIMENT:
 			#texto de identificação do processo no terminal
 			cmd = self.command.split(CFG.CODEC_NAME)[1]
 			cmd = cmd.split(CFG.VIDEO_EXTENSION)[0]
-			self.terminal_command = cmd
+			cmd = cmd.split('>')[0] #removendo a saida para o arquivo de log
+			self.terminal_command = cmd[1:-1] #removendo espaços em branco extras da linha de comando
 	
 	def get_command_line(self):
 		return self.terminal_command
@@ -434,10 +435,10 @@ class FIFO_CONTROL:
 				if (_core == core):
 					process_in_core.append(_cmd)
 		
-		#Para cada processo que realmente está executando no core observado
+		this_cmd = exp.get_command_line()
 		for process in process_in_core:
 			#Agora verifico se existe a linha de comando informada
-			if(exp.get_command_line() in process):
+			if(this_cmd in process):
 				#se existir, modifica o valor da variável de retorno
 				does_exist = True
 				break #encerra o laço, pois não precisa seguir buscando
