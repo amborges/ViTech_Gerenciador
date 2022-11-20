@@ -395,6 +395,9 @@ class FIFO_CONTROL:
 		
 		#é preciso saber quem está executando
 		self.executing = []
+		
+		#armazenando as experiências já finalizadas
+		self.list_of_exp_finished = []
 	
 	#Faz uma busca pelos processos em execução e verifica se determinado experimento
 	#ainda está ou não sendo executado.
@@ -515,17 +518,10 @@ class FIFO_CONTROL:
 		#libero o núcleo
 		self.core_control.free_core(core)
 		
-		#Adicionado um try para verificar se a busca ocorre como esperado.
-		#Em caso negativo, manter os valores nulos para as variáveis
-		#No futuro, corrigir esse procedimento
-		try:
-			exp.psnr_y, exp.bitrate, exp.time = CFG.get_psnr_bitrate_time(exp.outputlog)
-		except:
-			printlog("FALHA ao obter os dados do log para o arquivo " + exp.outputlog + ".")
+		#armazeno o experimento já concluído
+		self.list_of_exp_finished.append(exp)
 		
-		#exporta os dados finalizados para o arquivo CSV
-		exp.export()
-		
+		#Atualiza o arquivo de backup
 		self.save_backup()
 		
 	#função específica para treinos
@@ -594,7 +590,7 @@ class FIFO_CONTROL:
 # Código original em https://github.com/shengbinmeng/Bjontegaard_metric/blob/master/bjontegaard_metric.py
 #Recebe quatro vetores, e calcula a curva entre eles.
 #Quando colocamos o piecewise=1, os valores de BD-rate retornam com maior confiança!
-def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
+def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=1):
 	lR1 = np.log(R1)
 	lR2 = np.log(R2)
 
@@ -770,6 +766,22 @@ def printlog(text = "", end = "\n"):
 	f.write(text + end)
 	f.close()
 	
+#Função que lê a variável EXPERIENCE, e salva os dados capturados em um
+#arquivo CSV comum separado por pasta de vídeo codificado
+def log_exporting(exp):
+		filename = exp.video_name + '/summary_of_all_data.csv'
+		csv = open(filename, 'a')
+		if os.path.getsize(filename) == 0:
+			csv.write("set, cq, psnr_y, bitrate, time\n")
+		
+		if (exp.extra_param == ''):
+			text_to_show = exp.codec_folder + " under anchor"
+		else:
+			text_to_show = exp.codec_folder + " under " + exp.extra_param
+		
+		csv.write(text_to_show + "," + exp.cq + "," + str(exp.psnr_y) + "," + str(exp.bitrate) + "," + str(exp.time) + "\n")
+		csv.close()
+
 	
 ################
 ## __MAIN__() ##
@@ -890,8 +902,25 @@ if CFG.EXECUTE:
 	fifo_control.clean_executions()
 	fifo_control.clean_executions()
 	printlog("Aguarde. Já foram concluídos " + fifo_control.get_percentage_of_experiments_completed() + "% do experimento")
+	
+	#agora reabrindo todos os arquivos de log para criar o CSV juntando as métricas
+	printlog("\nIniciando captura das métricas de codificação...\n")
+	
+	for sub_exp in fifo_control.list_of_exp_finished:
+		try:
+			#Em caso de falha, manter os valores nulos para as variáveis
+			sub_exp.psnr_y, sub_exp.bitrate, sub_exp.time = CFG.get_psnr_bitrate_time(sub_exp.outputlog)
+		except:
+			printlog("FALHA ao capturar os dados do log para o arquivo " + exp.outputlog + ".")
+			sub_exp.psnr_y, sub_exp.bitrate, sub_exp.time = None, None, None
+		log_exporting(sub_exp)
+	
+	printlog("\nCaptura das métricas de codificação finalizada.\n")
 
 	printlog("\n\nFim das Simulações\n")
+	
+	#terminando de limpar a memória
+	del fifo_control
 	
 	
 ####################################################################
@@ -899,7 +928,7 @@ if CFG.EXECUTE:
 ## Aqui há a geração das simulações e gerenciamento das execuções ##
 ####################################################################
 
-if CFG.METRICS:	
+if CFG.METRICS:
 	for resolution, video, width, height, subsample, bitdepth, num_frames, frames_per_unit, num_unit in VIDEOS.VIDEOS_LIST:
 		path = HOME_PATH + '/' + video
 		coding_metrics_of(path)

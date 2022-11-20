@@ -19,7 +19,7 @@ __COMPATIBLE_WITH_VERSION__ = 1.4
 #                          #       #  #####  #####                             #
 #                           #     #   #   #  #   #                             #
 #                            #   #    #####  #####                             #
-#                             # #     #          #                             #
+#                             # #     #      #   #                             #
 #                              #      #      #####                             #
 #                                                                              #
 #                                                                              #
@@ -42,8 +42,8 @@ __COMPATIBLE_WITH_VERSION__ = 1.4
 ## Ativação de Funcionalidades ##
 #################################
 
-#Precisa baixar o libaom?
-DOWNLOAD = False
+#Precisa baixar o libvpx?
+DOWNLOAD = True
 
 #Se precisar que o download do libaom seja regredido para alguma versão passada
 #então modifique o texto abaixo para a versão requerida. Utilize somente os
@@ -51,7 +51,7 @@ DOWNLOAD = False
 DOWNGRADE_TO = '52b3a0'
 
 #Precisa compilar o libvpx?
-COMPILE  = False
+COMPILE  = True
 
 #Quer realizar somente uma única simulação, para ver alguma coisa específica?
 TESTE    = False
@@ -60,10 +60,10 @@ TESTE    = False
 EXECUTE  = True
 
 #É para calcular as métricas de codificação
-METRICS = True
+METRICS = False
 
 #É para gerar o gráfico da curva de BD-Rate?
-PLOT = True
+PLOT = False
 
 #Quer que mostre na tela o estado geral das simulações?
 #Caso opte por False, o arquivo de log ainda será gerado.
@@ -75,11 +75,10 @@ VERBOSE = False
 
 #Lista de núcleos que podem ser utilizados, lembre sempre de deixar pelo menos
 #um único núcleo para o sistema operacional.
-ALLOWED_CORES = [0, 1, 2]
+ALLOWED_CORES = [0, 1]
 
 #Lista de CQs a serem utilizados, deixe descomentado o que tu preferir
-CQ_LIST = [20, 32, 43, 55] #short list
-#CQ_LIST = [20, 24, 28, 32, 36, 39, 43, 47, 51, 55] #full list
+CQ_LIST = [20] #short list
 
 #Parâmetros extras que podem ser incluídos ao codificador. 
 #Este é um atributo que permite criar várias simulações onde há apenas a inclusão
@@ -104,7 +103,7 @@ EXTRA_PARAMS = []
 
 #Quantidade de quadros a ser executado (frames to be executed)
 #Se deixar com valor negativo, então o vídeo inteiro será codificado
-FTBE = 10
+FTBE = 60
 
 #Número máximo de núcleos que podem ser utilizados simultaneamente
 #Em geral, se tu selecionou os cores disponíveis, é pq eles podem
@@ -157,12 +156,13 @@ CODEC_PATHS = ['libvpx']
 #   frames_per_unit, número de frames por unidade de tempo do vídeo
 #   unit_size, tamanho da unidade de tempo do vídeo em segundos
 def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, extra_param, width, height, subsample, bitdepth, num_frames, frames_per_unit, unit_size):
-	#criando cada parte da linha de comando. Lembrar do espaçamento entre os parâmetros
 	
-	#comando completo
-	#libvpx --verbose --psnr --frame-parallel=0 --tile-columns=0 --passes=2 --cpu-used=0 --threads=1 --kf-min-dist=1000 --kf-max-dist=1000 --lag-in-frames=19 --width={WDT} --height={HGT} --fps={FPS} --end-usage=q --cq-level={CQ}
-	#SE 10b: --profile=2 --bit-depth={BD}
-	#SE 444: --profile=1 --i{SUB}
+	#O vp8 não permite vídeos diferente de 4:2:0 e 8b
+	if( (bitdepth != 8) || (subsample != 420) ):
+		print("FALHA: O vídeo {} não pode ser codificado no VP8, pois excede as capacidades do formato.\n".format(folder))
+		return '', ''
+	
+	#criando cada parte da linha de comando. Lembrar do espaçamento entre os parâmetros
 	
 	#nome da configuração extra_param, se existir
 	ep_name = ''
@@ -177,34 +177,19 @@ def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, ext
 	#definindo o caminho e nome do executável: ./libvpx
 	executable_param = codec_path + CODEC_NAME
 	
-	#definindo as configurações padrões para o AV1
-	main_cfg_param = ' --frame-parallel=0 --tile-columns=0 --passes=2 --cpu-used=0 --threads=1 --kf-min-dist=1000 --kf-max-dist=1000 --lag-in-frames=19'
+	#definindo as configurações padrões para o VP8
+	main_cfg_param = ' --codec=vp8 --passes=2 --cpu-used=0 --threads=1 --kf-min-dist=1000 --kf-max-dist=1000 --lag-in-frames=19'
 	
 	#definindo os parâmetros de log
 	verb_param = ' --verbose --psnr'
-	
-	#Condições especiais de configuração
-	#Caso vídeo tiver subamostragem 420
-	if (subsample == 420):
-		#Caso vídeo for 8bit de profundidade
-		if (bitdepth == 8):
-			main_cfg_param += ' --profile=0 --i420 --bit-depth=8'
-		else:
-			main_cfg_param += ' --profile=2 --i420 --bit-depth=' + str(bitdepth) + ' --input-bit-depth=' + str(bitdepth)
-	else:
-		#Caso vídeo for 8bit de profundidade
-		if (bitdepth == 8):
-			main_cfg_param += ' --profile=1 --i' + str(subsample) + ' --bit-depth=8'
-		else:
-			main_cfg_param += ' --profile=3 --i' + str(subsample) + ' --bit-depth=' + str(bitdepth) + ' --input-bit-depth=' + str(bitdepth)
-	
+		
 	#definindo as informações do vídeo
 	video_param  = ' --width=' + str(width) #width
 	video_param += ' --height=' + str(height) #hight
 	video_param += ' --fps=' + str(frames_per_unit) + '/' + str(unit_size) #fps
 	
 	#definindo o nível de quantização
-	quant_param  = ' --end-usage=q --cq-level=' + str(cq)
+	quant_param  = ' --end-usage=q --cq-level=' + str(cq) + ' --min-q=' + str(int(cq) - 4) + ' --max-q=' + str(int(cq) + 4)
 	
 	#definindo o limite de frames a ser executado
 	limit_param = ' --limit=' + str(num_frames)
@@ -216,7 +201,7 @@ def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, ext
 			
 	
 	#definindo o caminho que será salvo o arquivo de vídeo codificado
-	codfile_param = ' -o ' + this_folder + 'video/coded_' + path_id +  ep_name + '.vp9'
+	codfile_param = ' -o ' + this_folder + 'video/coded_' + path_id +  ep_name + '.vp8'
 	
 	#definindo o caminho do vídeo de entrada
 	rawvideo_param = ' ' + video_path
@@ -239,7 +224,7 @@ def GENERATE_COMMAND(cq, folder, video_path, codec_path, home_path, path_id, ext
 	
 	#o & comercial no final serve para colocar o processo em segundo plano!
 	codec_command += ' &'
-	print(codec_command)
+	
 	#retornando a linha de comando e o arquivo de saída
 	return codec_command, output_filename
 	
@@ -279,9 +264,7 @@ def get_psnr_bitrate_time(from_file):
 	
 	bitrate = float(words[6][:-3]) / 1000 #removendo o b/s e convertendo de bps para kbps
 	time = float(words[7]) / 1000 # convertendo de ms para seg
-	
-	
-	
+		
 	#TRATANDO A ULTIMA LINHA
 	#ex: Stream 0 PSNR (Overall/Avg/Y/U/V) 42.746 43.507 42.434 47.531 48.041
 	
@@ -333,16 +316,7 @@ def DO_COMPILE(os_version, codec_path):
 		os.system('rm -rf ' + codec_path)
 	os.system('mkdir ' + codec_path)
 	
-	cmake_command = 'cd ' + codec_path + ' && ../configure --enable-vp9-highbitdepth'
-#	if os_version == 18.04:
-#		#Em algumas máquinas, dá pra rodar a linha de baixo. O libaom fica especializado
-#		cmake_command = 'cd ' + codec_path + ' && cmake ..'
-#	elif os_version > 18.04:
-#		#Mas na maioria não, daí tem que compilar de forma genérica:
-#		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic ..'
-#	else:
-#		#Em caso de ubuntu mais velho, utilizar a seguinte chamada:
-#		cmake_command = 'cd ' + codec_path + ' && cmake -DAOM_TARGET_CPU=generic -DENABLE_DOCS=0 ..'
-	make_command = 'cd ' + codec_path + ' && make'
+	cmake_command = 'cd ' + codec_path + ' && ../configure'
+	make_command = 'cd ' + codec_path + ' && make -j ' + str(len(ALLOWED_CORES))
 	os.system(cmake_command)
 	os.system(make_command)
